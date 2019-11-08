@@ -8,6 +8,7 @@ import Control.Monad.Reader
 --import qualified Data.Vector as V
 import Data.Word
 import qualified Data.SortedList as SL
+import Crypto.Hash.SHA256
 
 type Gen = Random.GenIO
 
@@ -50,22 +51,12 @@ getRandomList n d = liftEntropy $ Entropy $ do
   replicateM n (Random.uniformR (0,d-1) g)
 
 
--- | Sparse vectors have dimension and a list of indexes but no values yet, but could be pairs
--- with the indexes.
-{-
---data SparseVector a = SVec a (SortedList a) deriving (Show)
-data SparseVector a = SVec { dim_ :: !a
-                           , idx_ :: !(SL.SortedList a)
-                           } deriving (Show)
--}
+-- | Sparse vectors have a dimension and a list of indexes and values in classic
+-- sparse vector form there are also binary/bit/boolean vectors which just have
+-- the indexes and no value type storage.
 
--- with values...
-data SparseVector i v = SVec { dim2_ :: !i
-                             , idx2_ :: !(SL.SortedList (i,v))
-                             }
-                      | BVec { dim_ :: !i
-                             , idx_ :: !(SL.SortedList i)
-                             }
+data SparseVector i v = SVec !i !(SL.SortedList (i,v))
+                      | BVec !i !(SL.SortedList i)
                       deriving (Show)
 
 
@@ -79,8 +70,10 @@ toZeros :: (Ord i, Ord v, Num v) => [i] -> SL.SortedList (i, v)
 toZeros i = toSortedPairs i (repeat 0)
 
 
--- sparse distirbuted vectors have a uniform probaility p of an index at given value of dim_
+-- | sparse distirbuted vectors have a uniform probaility p of an index at given dimensionality
+
 -- | p d useful for bit vectors existential on index but with no values
+-- XXshould we force v type to be Void?
 
 makeSparseRandomBitVector  :: (MonadEntropy m, Random.Variate a, Integral a) =>
                               Int -> a -> m (SparseVector a v)
@@ -103,32 +96,34 @@ makeSparseRandomVector p d = (SVec d . toZeros) <$> (getRandomList p d)
 
 -- | Could make this a vector of vectors... (matrix) rather than a list
 makeSparseRandomVectors :: (MonadEntropy m, Random.Variate a, Integral a, Num v, Ord v) =>
-                              Int -> Int -> a -> m [SparseVector a v]
+                           Int -> Int -> a -> m [SparseVector a v]
 makeSparseRandomVectors n p d = replicateM n (makeSparseRandomVector p d)
 
 
 -- | Add two sparse vectors
 -- XXX no dim check, no dependent types.
+-- does it make sense to add mixed?
 
-add :: (Ord i, Ord v, Num v) => SparseVector i v -> SparseVector i v -> SparseVector i v
+add :: (Ord i, Ord v, Num v) =>
+       SparseVector i v -> SparseVector i v -> SparseVector i v
 add (BVec !ud !ui) (BVec !vd !vi) = BVec ud (SL.union ui vi)
 add (SVec !ud !ui) (SVec !vd !vi) =
   let us = SL.fromSortedList ui
       vs = SL.fromSortedList vi
-  in SVec ud (SL.toSortedList (unionAdd us vs))
+  in SVec ud (SL.toSortedList (unionWith (+) us vs))
 
-  
--- | Trixy little pattern match to merge (add) sorted index pairs
-unionAdd :: (Ord a, Num b) => [(a, b)] -> [(a, b)] -> [(a, b)]
-unionAdd p1@((i1,v1):r1) p2@((i2,v2):r2)
-  | i1 > i2 = (i2, v2) : unionAdd p1 r2
-  | i1 < i2 = (i1, v1) : unionAdd r1 p2
-  | i1 == i2 = (i1, v1+v2) : unionAdd r1 r2
-unionAdd [] l@(x:xs) = l  
-unionAdd l@(x:xs) [] = l
-unionAdd [] [] = []
 
--- does it make sense to add mixed?
+-- | Union/merge of sorted lists of index pairs takes binary function of values
+unionWith :: (Ord a, Num b) => (b -> b -> b) -> [(a, b)] -> [(a, b)] -> [(a, b)]
+unionWith f p1@((i1,v1):r1) p2@((i2,v2):r2)
+  | i1 > i2 = (i2, v2) : unionWith f p1 r2
+  | i1 < i2 = (i1, v1) : unionWith f r1 p2
+  | i1 == i2 = (i1, f v1 v2) : unionWith f r1 r2
+unionWith f [] l@(x:xs) = l  
+unionWith f l@(x:xs) [] = l
+unionWith f [] [] = []
+
+
 {-
 size :: SparseVector a -> Int
 size (SVec _ !ui) = length ui
