@@ -5,6 +5,7 @@ module Data.SDM.VectorSpace where
 import Control.Monad
 import Data.SDM.Entropy
 import qualified Data.SortedList as SL
+import qualified Data.Set as Set
 
 ---------------------------------------------------------------------------------------------
 -- | Sparse vectors have a dimension and a list of indexes and values in classic
@@ -75,13 +76,15 @@ zeros :: (Ord v, Num v) => [v]
 zeros = repeat 0
 
 
--- | Add two sparse vectors.  we are inclined to ignore the
--- dimensionality of one or other arguments here on the assumption
--- that it makes no sense for them to be different. I'm thinking that
--- the dimensionality of a sparse vector is really in the greatest
--- lower bound on the number of indexes existing and the capacity of
--- the index type and could be part of the evaluation semantics rather than
--- fixed in the type... we could take the max of course!
+-- | Add two sparse vectors.
+--
+-- we are inclined to ignore the dimensionality of one or other
+-- arguments here on the assumption that it makes no sense for them to
+-- be different. I'm thinking that the dimensionality of a sparse
+-- vector is really in the greatest lower bound on the number of
+-- indexes existing and the capacity of the index type and could be
+-- part of the evaluation semantics rather than fixed in the
+-- type... but we could take the max of course!
 
 add :: (Ord i, Ord v, Num v) =>
        SparseVector i v -> SparseVector i v -> SparseVector i v
