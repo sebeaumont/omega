@@ -19,6 +19,7 @@ extra-source-files:  CHANGELOG.md
 library
   exposed-modules:     Data.SDM.VectorSpace
                      , Data.SDM.Entropy
+                     
   -- other-modules:
   -- other-extensions:
   build-depends:       base >=4.13 && <4.14
@@ -38,3 +39,4 @@ test-suite breeze-test
   hs-source-dirs:      tst
   main-is:             MyLibTest.hs
   build-depends:       base >=4.13 && <4.14
+                     , breeze

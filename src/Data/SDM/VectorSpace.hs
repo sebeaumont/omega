@@ -15,7 +15,8 @@ data SparseVector i v = SVec !i !(SL.SortedList (i,v))
                       | BVec !i !(SL.SortedList i)
                       deriving (Show)
 
--- auxiliary constructors
+-- auxiliary constructors TODO look at using sets in stead of SortedLists...
+-- if we can avoid converting back and forth too much
 
 toSortedPairs :: (Ord a, Ord b) => [a] -> [b] -> SL.SortedList (a, b)
 toSortedPairs i v = SL.toSortedList $ zip i v
@@ -108,8 +109,6 @@ negatev :: (Ord i, Ord v, Num v) => SparseVector i v -> SparseVector i v
 negatev (SVec d vs) = SVec d $ SL.map (\(i,v) -> (i, negate v)) vs
 negatev u@(BVec _ _) = u
 
-
-
 -- | Subtract -- under construction!
 
 sub :: (Ord i, Ord v, Num v) =>
@@ -122,16 +121,17 @@ sub (BVec !ud !ui) (BVec _ !vi) =
   
 -- Sparse typed value vectors
 sub u@(SVec _ _) v@(SVec _ _) = add u (negatev v)
--- TODO mixed arithmetic:
 
+-- TODO mixed arithmetic:
+sub u@(SVec _ _) (BVec _ _) = u
+sub u@(BVec _ _) (SVec _ _) = u
 
 -- TODO filter zero values? (truncate?)
 
 -- | set difference using sortedlist
 
 -- | Set difference remove members of second list from first
--- difference list can't beleive I'm doing this
--- look into Data.Set instead of SortedList
+-- so look into Data.Set instead of SortedList
 difference :: Ord a => [a] -> [a] -> [a]
 difference l1 [] = l1
 difference [] _ = []
@@ -141,6 +141,20 @@ difference l1@(x:xs) l2@(y:ys)
   | x > y = difference l1 ys
 difference _ _ = []
 
+-- | `mul` elementwise multiplication of vectors
+
+mul :: (Ord i, Ord v, Num v) =>
+       SparseVector i v -> SparseVector i v -> SparseVector i v
+-- Binary vectors
+mul (BVec !ud !ui) (BVec _ !vi) = BVec ud (SL.intersect ui vi)
+-- Sparse typed value vectors
+mul (SVec !ud !ui) (SVec _ !vi) =
+  let us = SL.fromSortedList ui
+      vs = SL.fromSortedList vi
+  in SVec ud (SL.toSortedList (unionWith (*) us vs))
+-- TODO mixed arithmetic:
+mul u@(SVec _ _) (BVec _ _) = u
+mul u@(BVec _ _) (SVec _ _) = u
   
 -- Incremental union/merge of sorted lists of index pairs takes
 -- binary function of values. N.B. due to non-greedy behaviour only
@@ -174,11 +188,14 @@ density :: Integral i => SparseVector i v -> Double
 density v@(SVec !ud _) = fromIntegral (size v) / fromIntegral ud
 density v@(BVec !ud _) = fromIntegral (size v) / fromIntegral ud
 
--- | Subtraction
-
-{-
 -- | Similartiy/distance
-sqdistance :: (Ord i, Ord v, Num v) => SparseVector i v -> SparseVector i v -> v
-sqdistance u@(SVec _ uv) v@(SVec _ vv) = sub u v
--}
+sqdist :: (Ord i, Ord v, Num v) => SparseVector i v -> SparseVector i v -> v
+sqdist u@(SVec _ _) v@(SVec _ _) =
+  let dv = sub u v
+      (SVec _ !v2) = mul dv dv
+  in sum [x | (_,x) <- SL.fromSortedList v2]
+-- .. 
+
+{- TODO: dense representations? -}                        
+
 
