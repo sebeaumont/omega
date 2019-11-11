@@ -17,7 +17,8 @@ build-type:          Simple
 extra-source-files:  CHANGELOG.md
 
 library
-  exposed-modules:     Breeze
+  exposed-modules:     Data.SDM.VectorSpace
+                     , Data.SDM.Entropy
   -- other-modules:
   -- other-extensions:
   build-depends:       base >=4.13 && <4.14

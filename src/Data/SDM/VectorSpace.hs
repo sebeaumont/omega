@@ -1,59 +1,12 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE BangPatterns #-}
 
--- | Its a breeze: Sparse, Random, Distributed memory etc. motto: keep
--- it simple and and explore the mathematical properties before
--- getting back to performance of the induced algebra herein. We are
--- really looking at the vector/metric space or more generally the
--- module over randomly distributed vectors.
+module Data.SDM.VectorSpace where
 
-module Breeze where
-
-import qualified System.Random.MWC as Random
-import Control.Monad.Reader
-
---import qualified Data.Vector as V -- might go unboxed and mmap for db in due course...
+import Control.Monad
+import Data.SDM.Entropy
 import qualified Data.SortedList as SL
-import Crypto.Hash.SHA256 -- for later
 
-type Gen = Random.GenIO
-
--- | Encapsulate underlying RNG
-newtype RNG = RNG Gen
-
--- | Init the RNG and let the entropy flow
-initRNG ::  IO RNG
-initRNG = do RNG <$> Random.createSystemRandom
-
--- | We may want more here in due course...
-data Environment = Env { envRNG :: RNG }
-
-
--- | thread access to sparse environment
-newtype Entropy a = Entropy (ReaderT Environment IO a)
-  deriving (Functor, Applicative, Monad, MonadIO, MonadReader Environment)
-
-class (Monad m) => MonadEntropy m where
-  liftEntropy :: Entropy a -> m a
-  
-instance MonadEntropy Entropy where
-  liftEntropy = id
-
-
--- | Run actions in the context of Entropy monad - might make this more general to
-
-withEntropy :: Entropy a -> IO a
-withEntropy (Entropy s) = liftIO initRNG >>= \r -> runReaderT s (Env r) 
-  
-
--- | The vector needs to be constrained to a type `Random.Variate` which ahs enough capacity
--- for the upper bound or dimension d.
-
-getRandomList :: (MonadEntropy m, Random.Variate a, Integral a) => Int -> a -> m [a]
-getRandomList n d = liftEntropy $ Entropy $ do
-  RNG g <- asks envRNG
-  replicateM n (Random.uniformR (0,d-1) g)
-
+---------------------------------------------------------------------------------------------
 -- | Sparse vectors have a dimension and a list of indexes and values in classic
 -- sparse vector form there are also binary/bit/boolean vectors which just have
 -- the indexes and no value type storage.
@@ -62,6 +15,7 @@ data SparseVector i v = SVec !i !(SL.SortedList (i,v))
                       | BVec !i !(SL.SortedList i)
                       deriving (Show)
 
+-- auxiliary constructors
 
 toSortedPairs :: (Ord a, Ord b) => [a] -> [b] -> SL.SortedList (a, b)
 toSortedPairs i v = SL.toSortedList $ zip i v
@@ -74,11 +28,12 @@ toZeros i = toSortedPairs i (repeat 0)
 
 
 -- | sparse distirbuted vectors have a uniform probaility p of an index at given dimensionality
+-- N.B. XXX duplicates may occur! need to fix this -- need a randomChoice function XXX
 
 -- | p d useful for bit vectors existential on index but with no values
--- XXshould we force v type to be Void?
+-- XX should we force v type to be Void?
 
-makeSparseRandomBitVector  :: (MonadEntropy m, Random.Variate a, Integral a) =>
+makeSparseRandomBitVector  :: (MonadEntropy m, Variate a, Integral a) =>
                               Int -> a -> m (SparseVector a v)
 makeSparseRandomBitVector p d = (BVec d . SL.toSortedList) <$> (getRandomList p d)
 
@@ -86,19 +41,19 @@ makeSparseRandomBitVector p d = (BVec d . SL.toSortedList) <$> (getRandomList p 
 -- | Could make this a vector of vectors... (matrix) rather than a list
 -- withEntropy $ makeSparseRandomBitVectors 10 16 16496 :: IO ([SparseVector Word16 Void])
 
-makeSparseRandomBitVectors :: (MonadEntropy m, Random.Variate a, Integral a) =>
+makeSparseRandomBitVectors :: (MonadEntropy m, Variate a, Integral a) =>
                               Int -> Int -> a -> m [SparseVector a v]
 makeSparseRandomBitVectors n p d = replicateM n (makeSparseRandomBitVector p d)
 
 -- | p d v=0 sparse random with values...
 -- withEntropy $ makeSparseVector2 16 16392 :: IO (SparseVector2 Word16 Double)
 
-makeSparseRandomVector  :: (MonadEntropy m, Random.Variate a, Integral a, Num v, Ord v) =>
+makeSparseRandomVector  :: (MonadEntropy m, Variate a, Integral a, Num v, Ord v) =>
                            Int -> a -> m (SparseVector a v)
 makeSparseRandomVector p d = (SVec d . toZeros) <$> (getRandomList p d)
 
 -- | Could make this a vector of vectors... (matrix) rather than a list
-makeSparseRandomVectors :: (MonadEntropy m, Random.Variate a, Integral a, Num v, Ord v) =>
+makeSparseRandomVectors :: (MonadEntropy m, Variate a, Integral a, Num v, Ord v) =>
                            Int -> Int -> a -> m [SparseVector a v]
 makeSparseRandomVectors n p d = replicateM n (makeSparseRandomVector p d)
 
@@ -140,12 +95,12 @@ add (SVec !ud !ui) (SVec _ !vi) =
 -- mixed arithmetic:
 -- toZeros seems to satisfy type checker... do these make much sense anyway?
 add (SVec !ud !ui) (BVec _ !vi) =
-  let fk = toZeros $ SL.fromSortedList vi
-  in SVec ud (SL.toSortedList (unionWith (+) (SL.fromSortedList ui) (SL.fromSortedList fk)))
+  let zs = toZeros $ SL.fromSortedList vi
+  in SVec ud (SL.toSortedList (unionWith (+) (SL.fromSortedList ui) (SL.fromSortedList zs)))
     
 add (BVec _ !vi)  (SVec !ud !ui) =
-  let fk = toZeros $ SL.fromSortedList vi
-  in SVec ud (SL.toSortedList (unionWith (+) (SL.fromSortedList ui) (SL.fromSortedList fk)))
+  let zs = toZeros $ SL.fromSortedList vi
+  in SVec ud (SL.toSortedList (unionWith (+) (SL.fromSortedList ui) (SL.fromSortedList zs)))
 
 -- negate a vector
 
@@ -153,27 +108,47 @@ negatev :: (Ord i, Ord v, Num v) => SparseVector i v -> SparseVector i v
 negatev (SVec d vs) = SVec d $ SL.map (\(i,v) -> (i, negate v)) vs
 negatev u@(BVec _ _) = u
 
+
+
 -- | Subtract -- under construction!
 
 sub :: (Ord i, Ord v, Num v) =>
        SparseVector i v -> SparseVector i v -> SparseVector i v
 -- Binary vectors take intersection
-sub (BVec !ud !ui) (BVec _ !vi) = BVec ud (SL.intersect ui vi)
+sub (BVec !ud !ui) (BVec _ !vi) =
+  let us = SL.fromSortedList ui
+      vs = SL.fromSortedList vi
+  in BVec ud $ SL.toSortedList $ difference us vs
+  
 -- Sparse typed value vectors
 sub u@(SVec _ _) v@(SVec _ _) = add u (negatev v)
 -- TODO mixed arithmetic:
 
 
--- filter zero values? (truncate?)
+-- TODO filter zero values? (truncate?)
 
+-- | set difference using sortedlist
 
+-- | Set difference remove members of second list from first
+-- difference list can't beleive I'm doing this
+-- look into Data.Set instead of SortedList
+difference :: Ord a => [a] -> [a] -> [a]
+difference l1 [] = l1
+difference [] _ = []
+difference l1@(x:xs) l2@(y:ys)
+  | x == y = difference xs ys
+  | x < y = x : difference xs l2
+  | x > y = difference l1 ys
+difference _ _ = []
+
+  
 -- Incremental union/merge of sorted lists of index pairs takes
 -- binary function of values. N.B. due to non-greedy behaviour only
 -- applies binary fn to `snd` of matched `fst` in either list so this
 -- must be applied each time we wish to aggregate values as above.  So
 -- for duplicated `fst` or indexes e.g. we would get:
 --  `unionWith` (+) [(1,2),(1,3),(1,4)] [(1,2),(1,3),(1,4)] = [(1,4),(1,6),(1,8)]
---  rather than [(1.18)]
+--  rather than [(1,18)]
 
 unionWith :: (Ord a, Num b) => (b -> b -> b) -> [(a, b)] -> [(a, b)] -> [(a, b)]
 unionWith f p1@((i1,v1):r1) p2@((i2,v2):r2)
@@ -182,6 +157,7 @@ unionWith f p1@((i1,v1):r1) p2@((i2,v2):r2)
   | i1 == i2 = (i1, f v1 v2) : unionWith f r1 r2 
 unionWith _ l []  = l  
 unionWith _ [] l = l
+unionWith _ _ _ = [] -- undefined?
 
 -- | Size or length of vector 
 size :: SparseVector i v -> Int
