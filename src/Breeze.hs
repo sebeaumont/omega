@@ -1,14 +1,20 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE BangPatterns #-}
 
+-- | Its a breeze: Sparse, Random, Distributed memory etc. motto: keep
+-- it simple and and explore the mathematical properties before
+-- getting back to performance of the induced algebra herein. We are
+-- really looking at the vector/metric space or more generally the
+-- module over randomly distributed vectors.
+
 module Breeze where
 
 import qualified System.Random.MWC as Random
 import Control.Monad.Reader
---import qualified Data.Vector as V
-import Data.Word
+
+--import qualified Data.Vector as V -- might go unboxed and mmap for db in due course...
 import qualified Data.SortedList as SL
-import Crypto.Hash.SHA256
+import Crypto.Hash.SHA256 -- for later
 
 type Gen = Random.GenIO
 
@@ -17,9 +23,7 @@ newtype RNG = RNG Gen
 
 -- | Init the RNG and let the entropy flow
 initRNG ::  IO RNG
-initRNG = do
-  rng <- Random.createSystemRandom
-  return (RNG rng)
+initRNG = do RNG <$> Random.createSystemRandom
 
 -- | We may want more here in due course...
 data Environment = Env { envRNG :: RNG }
@@ -49,7 +53,6 @@ getRandomList :: (MonadEntropy m, Random.Variate a, Integral a) => Int -> a -> m
 getRandomList n d = liftEntropy $ Entropy $ do
   RNG g <- asks envRNG
   replicateM n (Random.uniformR (0,d-1) g)
-
 
 -- | Sparse vectors have a dimension and a list of indexes and values in classic
 -- sparse vector form there are also binary/bit/boolean vectors which just have
@@ -99,37 +102,107 @@ makeSparseRandomVectors :: (MonadEntropy m, Random.Variate a, Integral a, Num v,
                            Int -> Int -> a -> m [SparseVector a v]
 makeSparseRandomVectors n p d = replicateM n (makeSparseRandomVector p d)
 
+-- | Construct non-random sparse vector from lists of indexes and values 
+fromList :: (Ord i, Num i, Ord v) => i -> [i] -> [v] -> SparseVector i v
+fromList d is vs = SVec d $ SL.nub . SL.toSortedList $ zip is vs 
 
--- | Add two sparse vectors
--- XXX no dim check, no dependent types.
--- does it make sense to add mixed?
+-- | Construct non-random sparse vector from lists of indexes and values 
+sVecFromList :: (Ord i, Num i, Ord v) => i -> [i] -> [v] -> SparseVector i v
+sVecFromList = fromList
+
+-- | Construct binary (index only) sparse vector from lists of indexes
+bVecFromList :: (Ord i, Num i, Ord v) => i -> [i]  -> SparseVector i v
+bVecFromList d is = BVec d $ SL.nub . SL.toSortedList $  is
+
+-- todo make this work (and other constant intialisers) work like toZeros above...
+zeros :: (Ord v, Num v) => [v]
+zeros = repeat 0
+
+
+-- | Add two sparse vectors.  we are inclined to ignore the
+-- dimensionality of one or other arguments here on the assumption
+-- that it makes no sense for them to be different. I'm thinking that
+-- the dimensionality of a sparse vector is really in the greatest
+-- lower bound on the number of indexes existing and the capacity of
+-- the index type and could be part of the evaluation semantics rather than
+-- fixed in the type... we could take the max of course!
 
 add :: (Ord i, Ord v, Num v) =>
        SparseVector i v -> SparseVector i v -> SparseVector i v
-add (BVec !ud !ui) (BVec !vd !vi) = BVec ud (SL.union ui vi)
-add (SVec !ud !ui) (SVec !vd !vi) =
+-- Binary vectors
+add (BVec !ud !ui) (BVec _ !vi) = BVec ud (SL.union ui vi)
+-- Sparse typed value vectors
+add (SVec !ud !ui) (SVec _ !vi) =
   let us = SL.fromSortedList ui
       vs = SL.fromSortedList vi
   in SVec ud (SL.toSortedList (unionWith (+) us vs))
+  
+-- mixed arithmetic:
+-- toZeros seems to satisfy type checker... do these make much sense anyway?
+add (SVec !ud !ui) (BVec _ !vi) =
+  let fk = toZeros $ SL.fromSortedList vi
+  in SVec ud (SL.toSortedList (unionWith (+) (SL.fromSortedList ui) (SL.fromSortedList fk)))
+    
+add (BVec _ !vi)  (SVec !ud !ui) =
+  let fk = toZeros $ SL.fromSortedList vi
+  in SVec ud (SL.toSortedList (unionWith (+) (SL.fromSortedList ui) (SL.fromSortedList fk)))
+
+-- negate a vector
+
+negatev :: (Ord i, Ord v, Num v) => SparseVector i v -> SparseVector i v
+negatev (SVec d vs) = SVec d $ SL.map (\(i,v) -> (i, negate v)) vs
+negatev u@(BVec _ _) = u
+
+-- | Subtract -- under construction!
+
+sub :: (Ord i, Ord v, Num v) =>
+       SparseVector i v -> SparseVector i v -> SparseVector i v
+-- Binary vectors take intersection
+sub (BVec !ud !ui) (BVec _ !vi) = BVec ud (SL.intersect ui vi)
+-- Sparse typed value vectors
+sub u@(SVec _ _) v@(SVec _ _) = add u (negatev v)
+-- TODO mixed arithmetic:
 
 
--- | Union/merge of sorted lists of index pairs takes binary function of values
+-- filter zero values? (truncate?)
+
+
+-- Incremental union/merge of sorted lists of index pairs takes
+-- binary function of values. N.B. due to non-greedy behaviour only
+-- applies binary fn to `snd` of matched `fst` in either list so this
+-- must be applied each time we wish to aggregate values as above.  So
+-- for duplicated `fst` or indexes e.g. we would get:
+--  `unionWith` (+) [(1,2),(1,3),(1,4)] [(1,2),(1,3),(1,4)] = [(1,4),(1,6),(1,8)]
+--  rather than [(1.18)]
+
 unionWith :: (Ord a, Num b) => (b -> b -> b) -> [(a, b)] -> [(a, b)] -> [(a, b)]
 unionWith f p1@((i1,v1):r1) p2@((i2,v2):r2)
   | i1 > i2 = (i2, v2) : unionWith f p1 r2
   | i1 < i2 = (i1, v1) : unionWith f r1 p2
-  | i1 == i2 = (i1, f v1 v2) : unionWith f r1 r2
-unionWith f [] l@(x:xs) = l  
-unionWith f l@(x:xs) [] = l
-unionWith f [] [] = []
+  | i1 == i2 = (i1, f v1 v2) : unionWith f r1 r2 
+unionWith _ l []  = l  
+unionWith _ [] l = l
 
+-- | Size or length of vector 
+size :: SparseVector i v -> Int
+size (SVec _ !ui) = length ui
+size (BVec _ !ui) = length ui
+
+-- | Dimensionality
+dims :: Integral i => SparseVector i v -> i
+dims (SVec !d _) = d
+dims (BVec !d _) = d
+
+-- | Density
+density :: Integral i => SparseVector i v -> Double
+density v@(SVec !ud _) = fromIntegral (size v) / fromIntegral ud
+density v@(BVec !ud _) = fromIntegral (size v) / fromIntegral ud
+
+-- | Subtraction
 
 {-
-size :: SparseVector a -> Int
-size (SVec _ !ui) = length ui
-
-density :: Integral a => SparseVector a -> Double
-density v@(SVec !ud _) = fromIntegral (size v) / fromIntegral ud
+-- | Similartiy/distance
+sqdistance :: (Ord i, Ord v, Num v) => SparseVector i v -> SparseVector i v -> v
+sqdistance u@(SVec _ uv) v@(SVec _ vv) = sub u v
 -}
-
 
