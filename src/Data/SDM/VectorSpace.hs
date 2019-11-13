@@ -48,7 +48,7 @@ makeSparseRandomBitVectors :: (MonadEntropy m, Variate a, Integral a) =>
 makeSparseRandomBitVectors n p d = replicateM n (makeSparseRandomBitVector p d)
 
 -- | p d v=0 sparse random with values...
--- withEntropy $ makeSparseVector2 16 16392 :: IO (SparseVector2 Word16 Double)
+-- withEntropy $ makeSparseVector2 16 16392 :: IO (SparseVector Word16 Double)
 
 makeSparseRandomVector  :: (MonadEntropy m, Variate a, Integral a, Num v, Ord v) =>
                            Int -> a -> m (SparseVector a v)
