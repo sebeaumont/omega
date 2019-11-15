@@ -19,25 +19,27 @@ extra-source-files:  CHANGELOG.md
 library
   exposed-modules:     Data.SDM.VectorSpace
                      , Data.SDM.Entropy
-                     
+                     , Data.SDM.Index
   -- other-modules:
   -- other-extensions:
-  build-depends:       base >=4.13 && <4.14
+  build-depends:       base
                      , mtl
                      --, vector
                      , mwc-random
                      , containers
                      , sorted-list
                      , cryptohash-sha256
-                     , sqlite-simple > 0.4.16.0
+                     , sqlite-simple
+                     , grenade
   hs-source-dirs:      src
   ghc-options:       -Wall -O1
   default-language:    Haskell2010
 
-test-suite breeze-test
-  default-language:    Haskell2010
-  type:                exitcode-stdio-1.0
-  hs-source-dirs:      tst
-  main-is:             MyLibTest.hs
-  build-depends:       base >=4.13 && <4.14
-                     , breeze
+  
+executable words
+  build-depends:      base
+                    , text
+  ghc-options:        -Wall -O3 -threaded
+  hs-source-dirs:     utl
+  main-is:            words.hs
+  default-language:   Haskell2010
