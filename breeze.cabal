@@ -20,6 +20,8 @@ library
   exposed-modules:     Data.SDM.VectorSpace
                      , Data.SDM.Entropy
                      , Data.SDM.Index
+                     , Data.Text.Tokenize
+                     
   -- other-modules:
   -- other-extensions:
   build-depends:       base
@@ -31,6 +33,7 @@ library
                      , cryptohash-sha256
                      , sqlite-simple
                      , grenade
+                     , text
   hs-source-dirs:      src
   ghc-options:       -Wall -O1
   default-language:    Haskell2010
@@ -38,6 +41,7 @@ library
   
 executable words
   build-depends:      base
+                    , breeze
                     , text
   ghc-options:        -Wall -O3 -threaded
   hs-source-dirs:     utl
