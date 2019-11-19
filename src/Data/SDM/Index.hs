@@ -131,4 +131,5 @@ indexStdin = do
     let fms = frames 20 2 $ tokens text
     tm <- indexFrames Map.empty fms
     -- nothing really happens until here...
-    liftIO $ print tm
+    let densities = [(k, density $ sV v) | (k,v) <- Map.toList tm] 
+    liftIO $ print densities
