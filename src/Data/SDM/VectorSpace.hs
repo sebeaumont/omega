@@ -86,7 +86,7 @@ zeros = repeat 0
 -- part of the evaluation semantics rather than fixed in the
 -- type... but we could take the max of course!
 
-add :: (Ord i, Ord v, Num v) =>
+add :: (Ord i, Ord v, Num v) => -- XXXX FIXME Num v breaks down for binary vectors! XXXX
        SparseVector i v -> SparseVector i v -> SparseVector i v
 -- Binary vectors
 add (BVec !ud !ui) (BVec _ !vi) = BVec ud (SL.union ui vi)
