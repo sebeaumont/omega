@@ -197,7 +197,11 @@ sqdist u@(SVec _ _) v@(SVec _ _) =
       (SVec _ !v2) = mul dv dv
   in sum [x | (_,x) <- Set.toList v2]
 -- no cigar... hmmm more bogisity in this type TODO XXX need a typeclass for SparseVector  
--- sqdist (BVec !d !ui) (BVec _ !vi) = Set.size (Set.difference ui vi) 
+
+-- this would be xor bitwise
+distance :: Ord a => SparseVector a v -> SparseVector a v -> Int
+distance (BVec _ !ui) (BVec _ !vi) = Set.size (Set.difference (Set.union ui vi)
+                                               (Set.intersection ui vi))
 -- TODO  or not?
 -- sqdist (SVec _ _) (BVec _ _) = undefined
 -- sqdist (BVec _ _) (SVec _ _) = undefined

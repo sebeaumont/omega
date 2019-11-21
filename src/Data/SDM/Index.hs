@@ -132,6 +132,16 @@ indexStdin = do
     let fms = frames 20 2 $ tokens text
     tm <- indexFrames Map.empty fms
     -- due to lazy data nothing really happens until here...
-    let densities = [(k, density $ sV v) | (k,v) <- Map.toList tm]
-    -- print densities 
-    liftIO $ mapM_ (\(s,r) -> printf "%.6f\t%s\n" r s) densities
+    --let densities = [(k, density $ sV v) | (k,v) <- Map.toList tm]
+    let vectors = [(k, sV v) | (k,v) <- Map.toList tm]
+    liftIO $ mapM_ (\(s,v) -> printf "%s\t%s\n" s (show v)) vectors
+
+
+indexFile :: FilePath -> Int -> Int -> IO TokenMap
+indexFile fp sz ov =
+  withEntropy $ do
+    text <- liftIO $ TIO.readFile fp
+    let fms = frames sz ov $ tokens text
+    indexFrames Map.empty fms
+    
+    
