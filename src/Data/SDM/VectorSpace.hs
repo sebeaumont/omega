@@ -1,10 +1,10 @@
 {-# LANGUAGE BangPatterns #-}
 
 module Data.SDM.VectorSpace where
+-- | First pass on SparseVector algebra - pragmatics rule over mathematics here :(
 
 import Control.Monad
 import Data.SDM.Entropy
---import qualified Data.SortedList as SL
 import qualified Data.Set as Set
 import Data.Set (Set)
 
@@ -93,6 +93,7 @@ unionWith _ [] l = l
 unionWith _ _ _ = []
 
 -- | Try and do merge f with sets
+-- XXX TODO: could partition union of s1 s2 based on a and then reduce with f
 {-# INLINE mergeWith #-}
 mergeWith :: (Ord a, Ord b, Num b) => (b -> b -> b) -> Set(a,b) -> Set(a,b) -> Set(a,b)
 mergeWith f s1 s2 =
@@ -105,7 +106,7 @@ mergeWith f s1 s2 =
 -- we are inclined to ignore the dimensionality of one or other
 -- arguments here on the assumption that it makes no sense for them to
 -- be different. I'm thinking that the dimensionality of a sparse
--- vector is really in the greatest lower bound on the number of
+-- vector is really in the interval greatest lower bound on the number of
 -- indexes existing and the capacity of the index type and could be
 -- part of the evaluation semantics rather than fixed in the
 -- type... but we could take the max of course!

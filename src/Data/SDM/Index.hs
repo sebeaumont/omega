@@ -9,8 +9,9 @@ import qualified Data.Text.Lazy as T
 import qualified Data.Text.Lazy.IO as TIO
 import Data.Text.Tokenize
 import qualified Data.HashMap.Strict as Map
--- not yet Rosin, not yet: import Grenade
+import Text.Printf
 
+-- import Grenade
 {-
 
 Explore the use case where we use SDM to train the embedding of some
@@ -130,6 +131,7 @@ indexStdin = do
     text <- liftIO $ TIO.getContents
     let fms = frames 20 2 $ tokens text
     tm <- indexFrames Map.empty fms
-    -- nothing really happens until here...
-    let densities = [(k, density $ sV v) | (k,v) <- Map.toList tm] 
-    liftIO $ print densities
+    -- due to lazy data nothing really happens until here...
+    let densities = [(k, density $ sV v) | (k,v) <- Map.toList tm]
+    -- print densities 
+    liftIO $ mapM_ (\(s,r) -> printf "%.6f\t%s\n" r s) densities
