@@ -125,16 +125,12 @@ indexText text fsize over =
 
 
 -- | e.g. Index tokenised text from stdin
-indexStdin :: IO ()  
-indexStdin = do
+indexStdin :: Int -> Int -> IO TokenMap  
+indexStdin sz ov = do
   withEntropy $ do
     text <- liftIO $ TIO.getContents
-    let fms = frames 20 2 $ tokens text
-    tm <- indexFrames Map.empty fms
-    -- due to lazy data nothing really happens until here...
-    --let densities = [(k, density $ sV v) | (k,v) <- Map.toList tm]
-    let vectors = [(k, sV v) | (k,v) <- Map.toList tm]
-    liftIO $ mapM_ (\(s,v) -> printf "%s\t%s\n" s (show v)) vectors
+    let fms = frames sz ov $ tokens text
+    indexFrames Map.empty fms
 
 
 indexFile :: FilePath -> Int -> Int -> IO TokenMap
@@ -144,4 +140,18 @@ indexFile fp sz ov =
     let fms = frames sz ov $ tokens text
     indexFrames Map.empty fms
     
-    
+-- Some transformations on the TokenMap
+
+-- | Select neighbours with difference (normalised distance) below given threshold
+
+neighbours :: TokenMap -> SemanticVector -> Double -> [(T.Text, Double)]
+neighbours m v s =
+  let v' = sV v
+      namedist = sortOn snd [(n,difference (sV t) v') | (n,t) <- Map.toList m]
+  in
+    takeWhile (\(_,s') -> s' < s) namedist
+
+
+token :: TokenMap -> T.Text -> Maybe SemanticVector
+token m s = Map.lookup s m
+

@@ -1,7 +1,6 @@
 {-# LANGUAGE BangPatterns #-}
-
 module Data.SDM.VectorSpace where
--- | First pass on SparseVector algebra - pragmatics rule over mathematics here :(
+-- | First pass on SparseVector algebra - pragmatics rule over mathematics here
 
 import Control.Monad
 import Data.SDM.Entropy
@@ -134,6 +133,7 @@ negatev (SVec d vs) = SVec d $ Set.map (\(i,v) -> (i, negate v)) vs
 -- what does it mean to negate a bit vector?
 negatev u@(BVec _ _) = u
 
+{-
 -- | Set difference remove members of second list from first
 -- so look into Data.Set instead of SortedList
 difference :: Ord a => [a] -> [a] -> [a]
@@ -144,6 +144,7 @@ difference l1@(x:xs) l2@(y:ys)
   | x < y = x : difference xs l2
   | x > y = difference l1 ys
 difference _ _ = []
+-}
 
 -- | Subtract
 
@@ -196,16 +197,24 @@ sqdist u@(SVec _ _) v@(SVec _ _) =
   let dv = sub u v
       (SVec _ !v2) = mul dv dv
   in sum [x | (_,x) <- Set.toList v2]
--- no cigar... hmmm more bogisity in this type TODO XXX need a typeclass for SparseVector  
 
--- this would be xor bitwise
+
+-- this would be xor bitwise and much faster dense no doubt
 distance :: Ord a => SparseVector a v -> SparseVector a v -> Int
 distance (BVec _ !ui) (BVec _ !vi) = Set.size (Set.difference (Set.union ui vi)
                                                (Set.intersection ui vi))
+
 -- TODO  or not?
 -- sqdist (SVec _ _) (BVec _ _) = undefined
 -- sqdist (BVec _ _) (SVec _ _) = undefined
 
+-- | Normalised distance
+difference :: Integral a => SparseVector a v -> SparseVector a v -> Double
+difference !u !v = (fromIntegral $ distance u v) / (fromIntegral $ dims u)
+
+-- | Inverse of difference
+similarity :: Integral a => SparseVector a v -> SparseVector a v -> Double
+similarity !u !v = 1.0 - difference u v 
 
 
 
