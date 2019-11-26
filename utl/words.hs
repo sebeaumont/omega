@@ -3,7 +3,6 @@ module Main where
 
 import qualified Data.Text.Lazy as T
 import qualified Data.Text.Lazy.IO as TIO 
-import Data.Char (isPunctuation)
 import Data.Text.Tokenize
 
 main :: IO ()

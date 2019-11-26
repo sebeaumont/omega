@@ -1,6 +1,6 @@
 {-# LANGUAGE BangPatterns #-}
 module Data.SDM.VectorSpace where
--- | First pass on SparseVector algebra - pragmatics rule over mathematics here
+-- | First pass on SparseVector algebra
 
 import Control.Monad
 import Data.SDM.Entropy
@@ -9,15 +9,14 @@ import Data.Set (Set)
 
 ---------------------------------------------------------------------------------------------
 -- | Sparse vectors have a dimension and a list of indexes and values in classic
--- sparse vector form there are also binary/bit/boolean vectors which just have
+-- sparse vector (i..,v) form there are also binary/bit/boolean vectors which just have
 -- the indexes and no value type storage.
 
 data SparseVector i v = SVec !i !(Set (i,v))
                       | BVec !i !(Set i)
                       deriving (Show)
 
--- auxiliary constructors TODO look at using sets in stead of SortedLists...
--- if we can avoid converting back and forth too much
+-- need to rename this to something more meaningful: toIndexSet
 
 toSortedPairs :: (Ord a, Ord b) => [a] -> [b] -> Set (a, b)
 toSortedPairs i v = Set.fromList $ zip i v

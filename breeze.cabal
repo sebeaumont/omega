@@ -32,8 +32,8 @@ library
                      , unordered-containers
                      , sorted-list
                      , cryptohash-sha256
-                     , sqlite-simple
-                     , grenade
+                     --, sqlite-simple
+                     --, grenade
                      , text
   hs-source-dirs:      src
   ghc-options:       -Wall -O3
