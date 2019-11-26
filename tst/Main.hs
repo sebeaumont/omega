@@ -5,6 +5,6 @@ import Data.SDM.Index
 
 main :: IO ()
 main = do
-  tm <- indexFile "dat/shakespeare.txt" 20 2
-  let Just york = token tm "york"
-  mapM_ print (neighbours tm york 0.33)
+  tm <- indexFile "dat/shakespeare.txt" 10 1
+  let Just york = token tm "summer"
+  mapM_ print (neighbours tm york 0.3 10)

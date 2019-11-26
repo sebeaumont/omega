@@ -9,8 +9,7 @@ import qualified Data.Text.Lazy as T
 import qualified Data.Text.Lazy.IO as TIO
 import Data.Text.Tokenize
 import qualified Data.HashMap.Strict as Map
-import Text.Printf
-
+--import Text.Printf
 -- import Grenade
 {-
 
@@ -48,6 +47,15 @@ type SparseBinaryVector = SparseVector Int Binary
 data SemanticVector = SV { sK :: SparseBinaryVector
                          , sV :: SparseBinaryVector
                          } deriving (Show)
+
+-- | distance
+dist :: SemanticVector -> SemanticVector -> Double
+dist u v = difference (sV u) (sV v)
+
+-- | density
+rho :: SemanticVector -> Double
+rho u = density (sV u)
+
 
 -- | Superpose SemanticVector u with sparse vector
 super :: SemanticVector -> SparseBinaryVector -> SemanticVector
@@ -144,12 +152,12 @@ indexFile fp sz ov =
 
 -- | Select neighbours with difference (normalised distance) below given threshold
 
-neighbours :: TokenMap -> SemanticVector -> Double -> [(T.Text, Double)]
-neighbours m v s =
+neighbours :: TokenMap -> SemanticVector -> Double -> Int -> [(T.Text, Double)]
+neighbours m v s n =
   let v' = sV v
       namedist = sortOn snd [(n,difference (sV t) v') | (n,t) <- Map.toList m]
   in
-    takeWhile (\(_,s') -> s' < s) namedist
+    take n $ takeWhile (\(_,s') -> s' < s) namedist
 
 
 token :: TokenMap -> T.Text -> Maybe SemanticVector
