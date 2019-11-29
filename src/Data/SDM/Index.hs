@@ -1,75 +1,15 @@
 module Data.SDM.Index where
 
 import Control.Monad.IO.Class (liftIO)
-import Data.List
-import Data.SDM.VectorSpace
+
+import Data.SDM.SemanticVector
 import Data.SDM.Entropy
---import Data.Void
+
 import qualified Data.Text.Lazy as T
 import qualified Data.Text.Lazy.IO as TIO
 import Data.Text.Tokenize
 import qualified Data.HashMap.Strict as Map
---import Text.Printf
--- import Grenade
-{-
 
-Explore the use case where we use SDM to train the embedding of some
-text and use this as input to a RNN (LSTM) and see how performance
-differs for a 1-hot representation.
-
-
- 1. Create test pipeline. In due course we really need a predictive model to measure?
-
--- Use shakespeare example
--- Pre train semantic space...
--- downsample SV's?
--- define LSTM network 
--- send to input layer of LSTM
-
-TODO: parameretize vector constructors for d and p
-
--}
-
--- try sparse bits embedding
--- type Binary = Void -- XXX FIXME VectorSpace.SparseVector
-
-p :: Int
-p = 16
-
-d :: Int
-d = 32768
-
--- | Let's try SparseBinary embedding
-type Binary = Int
-
-type SparseBinaryVector = SparseVector Int Binary
-
-data SemanticVector = SV { sK :: SparseBinaryVector
-                         , sV :: SparseBinaryVector
-                         } deriving (Show)
-
--- | distance
-dist :: SemanticVector -> SemanticVector -> Double
-dist u v = difference (sV u) (sV v)
-
--- | density
-rho :: SemanticVector -> Double
-rho u = density (sV u)
-
-
--- | Superpose SemanticVector u with sparse vector
-super :: SemanticVector -> SparseBinaryVector -> SemanticVector
-super u sv = u { sV = add sv (sV u) }
-
--- | NOTA superposition is associative (Monoid) => this can be fused
--- and we can batch superpose a frame...
--- if we dont mind reflection we can sum up all the sparse vectors
--- in a frame and then do only O(2n) vector adds
-
-mutual :: [SemanticVector] -> [SemanticVector]
-mutual vs = [super u mv | u <- vs] where
-  mv = let zv = bVecFromList d [] in
-         foldl' add zv [sK v | v <- vs] 
 
 -- | Map from term tokens to SemanticVectors   
 type TokenMap = Map.HashMap T.Text SemanticVector
@@ -84,12 +24,6 @@ updateVectors m (k:ks) (v:vs) =
 updateVectors m [] _ = m
 updateVectors m _ [] = m  
 
--- | Make a new SemanticVector - requires entropy for random number generation.
-makeSemanticVector :: MonadEntropy m => m SemanticVector
-makeSemanticVector = do
-  svK' <- makeSparseRandomBitVector p d
-  let svV' = bVecFromList d []
-  return $ SV svK' svV'
 
 -- | Lookup token and return a SemanticVector either existing or new.
 ensureSemanticVector :: MonadEntropy m => TokenMap -> T.Text -> m (SemanticVector, TokenMap)
@@ -132,6 +66,8 @@ indexText text fsize over =
   in indexFrames Map.empty fms
 
 
+-- IO, IO it's off to work we go...
+
 -- | e.g. Index tokenised text from stdin
 indexStdin :: Int -> Int -> IO TokenMap  
 indexStdin sz ov = do
@@ -151,14 +87,14 @@ indexFile fp sz ov =
 -- Some transformations on the TokenMap
 
 -- | Select neighbours with difference (normalised distance) below given threshold
-
+{-
 neighbours :: TokenMap -> SemanticVector -> Double -> Int -> [(T.Text, Double)]
 neighbours m v s n =
   let v' = sV v
       namedist = sortOn snd [(n,difference (sV t) v') | (n,t) <- Map.toList m]
   in
     take n $ takeWhile (\(_,s') -> s' < s) namedist
-
+-}
 
 token :: TokenMap -> T.Text -> Maybe SemanticVector
 token m s = Map.lookup s m

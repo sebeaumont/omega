@@ -18,7 +18,11 @@ extra-source-files:  CHANGELOG.md
 
 library
   exposed-modules:     Data.SDM.VectorSpace
+                     , Data.SDM.VectorSpace.Vector
+                     , Data.SDM.VectorSpace.SparseVector
+                     , Data.SDM.VectorSpace.SparseRandom
                      , Data.SDM.Entropy
+                     , Data.SDM.SemanticVector
                      , Data.SDM.Index
                      , Data.Text.Tokenize
                      
@@ -26,7 +30,8 @@ library
   -- other-extensions:
   build-depends:       base
                      , mtl
-                     --, vector
+                     , bitvec
+                     , vector
                      , mwc-random
                      , containers
                      , unordered-containers
