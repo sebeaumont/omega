@@ -9,12 +9,14 @@
 module Data.SDM.VectorSpace ( module Data.SDM.VectorSpace.Vector
                             , module Data.SDM.VectorSpace.SparseVector
                             , module Data.SDM.VectorSpace.SparseRandom
+                            , module Data.SDM.VectorSpace.DenseVector
                             ) where
 import Control.Monad.Reader
 import Control.Monad.Identity
 import Data.SDM.VectorSpace.Vector
 import Data.SDM.VectorSpace.SparseVector
 import Data.SDM.VectorSpace.SparseRandom
+import Data.SDM.VectorSpace.DenseVector
 
 -- | A dimensional context within which to interpret vectors we use a
 -- Double as this is most general! could make this a type param of Dimensions
@@ -46,13 +48,6 @@ class VectorSpace v where
   scale :: Vector v -> v -> Vector v
 -}  
   
--- | Incremental union/merge of sorted lists of index pairs takes
--- binary function of values. N.B. due to non-greedy behaviour only
--- applies binary fn to `snd` of matched `fst` in either list so this
--- must be applied each time we wish to aggregate values.  So
--- for duplicated `fst` or indexes e.g. we would get:
---  `unionWith` (+) [(1,2),(1,3),(1,4)] [(1,2),(1,3),(1,4)] = [(1,4),(1,6),(1,8)]
---  rather than [(1,18)]
 {-
 {-# INLINE unionWith #-}
 unionWith :: (Ord a, Num b) => (b -> b -> b) -> [(a, b)] -> [(a, b)] -> [(a, b)]
