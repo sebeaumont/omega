@@ -1,14 +1,10 @@
 {-# LANGUAGE BangPatterns #-}
 module Data.SDM.VectorSpace.SparseVector where
 
-import Data.Bit
-import Data.Word
 import Data.Set (Set)
-import qualified Data.Set as Set
 import Data.SDM.VectorSpace.Vector
 
 -- | Sparse vectors.
-
 newtype SparseBitVector = BVec Index deriving (Show)
 
 newtype SparseVector v = SVec (Vector v) deriving (Show)
@@ -36,3 +32,5 @@ add (BVec !u) (BVec !v) = BVec $ union u v
 sub :: SparseBitVector -> SparseBitVector -> SparseBitVector
 sub (BVec !u) (BVec !v) = BVec $ diff u v
 
+distance :: SparseBitVector -> SparseBitVector -> Int
+distance (BVec !u) (BVec !v) = size $ disjointUnion u v

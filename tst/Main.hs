@@ -7,5 +7,5 @@ main :: IO ()
 main = do
   tm <- indexFile "dat/shakespeare.txt" 10 1
   let Just york = token tm "summer"
-  --mapM_ print (neighbours tm york 0.3 10)
-  print york
+  mapM_ print (neighbours tm york 10000 20)
+  --print york
