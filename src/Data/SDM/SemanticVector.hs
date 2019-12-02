@@ -5,9 +5,7 @@ import Data.List
 import Data.SDM.VectorSpace
 import Data.SDM.Entropy
 
--- try sparse bits embedding
--- type Binary = Void -- XXX FIXME VectorSpace.SparseVector
-
+-- vector space dimensions and number of bits in sparse random vector
 p :: Int
 p = 16
 
@@ -40,3 +38,5 @@ makeSemanticVector = do
   !svK' <- makeSparseRandomBitVector p d
   let !svV' = denseZeroBVector d -- bitVecFromList []
   return $ SV svK' svV'
+
+

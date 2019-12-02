@@ -11,7 +11,10 @@ import Data.SDM.VectorSpace.SparseVector
 
 
 -- | Dense bit vectors based on unboxed vectors where we pack the bits into `Word`s
-newtype DenseBitVector = DBVec (U.Vector Bit) deriving (Show)
+newtype DenseBitVector = DBVec (U.Vector Bit)
+
+instance Show DenseBitVector where
+  show (DBVec v) = "DBVec " ++ (show $ countBits v)
 
 -- | Modify in place semantics for BitVectors
 newtype DenseMBitVector m = DMBVec (U.MVector (PrimState m) Bit)
@@ -62,18 +65,30 @@ instance Densify SparseBitVector where
   {-# INLINE toDense #-}
   toDense = bitVecToDense
 
-{-
--- also too slow and allocating XXX look to use dense bit vector as semantic vector
-ddistance :: SparseBitVector -> SparseBitVector -> Int
-ddistance !u !v =
-  let u' = castFromWords $ toDense u
-      v' = castFromWords $ toDense v
-  in countBits $ zipBits xor u' v'
--}
+-- metric
+distance :: DenseBitVector -> DenseBitVector -> Int  
+distance (DBVec !u) (DBVec !v) = countBits $ zipBits xor u v
 
---{-# INLINE ddistance #-}
-ddistance :: DenseBitVector -> DenseBitVector -> Int  
-ddistance (DBVec !u) (DBVec !v) = countBits $ zipBits xor u v
+-- algebra
+andv :: DenseBitVector -> DenseBitVector -> DenseBitVector
+andv (DBVec !u) (DBVec !v) = DBVec $ zipBits (.&.) u v 
+
+orv :: DenseBitVector -> DenseBitVector -> DenseBitVector
+orv (DBVec !u) (DBVec !v) = DBVec $ zipBits (.|.) u v 
+
+xorv :: DenseBitVector -> DenseBitVector -> DenseBitVector
+xorv (DBVec !u) (DBVec !v) = DBVec $ zipBits xor u v 
+
+negv :: DenseBitVector -> DenseBitVector
+negv (DBVec !u) = DBVec $ invertBits u
+
+zerov :: Int -> DenseBitVector
+zerov = denseZeroBVector
+
+-- TODO contraction/expansion of bit runs...
+scalev :: Double -> DenseBitVector -> DenseBitVector
+scalev !x !v = v
+
 
 --{-# INLINE superpose #-}
 superpose :: DenseBitVector -> SparseBitVector -> DenseBitVector
@@ -81,12 +96,13 @@ superpose (DBVec !dv) !sv =
   let !sv' = castFromWords $ toDense sv
   in DBVec $ zipBits (.|.) dv sv'
 
--- | this would be the best speed up.
+-- | this would be the best speed up for indexing
 
 superposeM :: PrimMonad m => SparseBitVector -> DenseMBitVector m  -> m ()
 superposeM !sv (DMBVec !dv) =
   let sv' = castFromWords $ toDense sv
   in zipInPlace (.|.) sv' dv
+
 
   
       

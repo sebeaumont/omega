@@ -35,6 +35,4 @@ add (BVec !u) (BVec !v) = BVec $ union u v
 sub :: SparseBitVector -> SparseBitVector -> SparseBitVector
 sub (BVec !u) (BVec !v) = BVec $ diff u v
 
---{-# INLINE distance #-}
-distance :: SparseBitVector -> SparseBitVector -> Int
-distance (BVec !u) (BVec !v) = size $ disjointUnion u v
+

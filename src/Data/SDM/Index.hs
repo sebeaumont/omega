@@ -81,11 +81,11 @@ indexFile fp sz ov =
     let fms = frames sz ov $ tokens text
     indexFrames Map.empty fms
     
--- | Select neighbours with difference (normalised distance) below given threshold
+-- | Select nearest neighbours with difference (normalised distance) below given threshold
 neighbours :: TokenMap -> SemanticVector -> Int -> Int -> [(T.Text, Int)]
 neighbours !m !v !s !n =
   let !v' = sV v
-      !namedist = sortOn snd [(t, ddistance (sV u) v') | (t,u) <- Map.toList m]
+      !namedist = sortOn snd [(t, distance (sV u) v') | (t,u) <- Map.toList m]
   in
     take n $ takeWhile (\(_,s') -> s' < s) namedist
 
