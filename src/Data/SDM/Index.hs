@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 module Data.SDM.Index where
 
 import Control.Monad.IO.Class (liftIO)
@@ -82,9 +83,9 @@ indexFile fp sz ov =
     
 -- | Select neighbours with difference (normalised distance) below given threshold
 neighbours :: TokenMap -> SemanticVector -> Int -> Int -> [(T.Text, Int)]
-neighbours m v s n =
-  let v' = sV v
-      namedist = sortOn snd [(t, ddistance (sV u) v') | (t,u) <- Map.toList m]
+neighbours !m !v !s !n =
+  let !v' = sV v
+      !namedist = sortOn snd [(t, ddistance (sV u) v') | (t,u) <- Map.toList m]
   in
     take n $ takeWhile (\(_,s') -> s' < s) namedist
 

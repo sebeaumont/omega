@@ -33,6 +33,7 @@ library
                      , mtl
                      , bitvec
                      , vector
+                     , primitive
                      , mwc-random
                      , containers
                      , unordered-containers

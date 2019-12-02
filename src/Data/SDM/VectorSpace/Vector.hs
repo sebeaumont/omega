@@ -18,6 +18,7 @@ newtype Matrix v = Mat (Set (Int,Int,v)) deriving (Show)
 toIndex :: [Int] -> Index
 toIndex !ix = Idx $ Set.fromList ix
 
+--{-# INLINE indexSet #-}
 indexSet :: Index -> Set Int
 indexSet (Idx !i) = i
 
@@ -25,7 +26,7 @@ indexToList :: Index -> [Int]
 indexToList (Idx !i) = Set.toList i 
 
 toVector :: Ord b => [Int] -> [b] -> Vector b
-toVector i v = Vect $ Set.fromList $ zip i v
+toVector !i !v = Vect $ Set.fromList $ zip i v
 
 vectorToList :: Vector v -> [(Int,v)]
 vectorToList (Vect !iv) = Set.toList iv
@@ -37,6 +38,7 @@ toZeros :: (Ord v, Num v) => [Int] -> Vector v
 toZeros = toInitVector 0
 
 --
+--{-# INLINE union #-}
 union :: Index -> Index -> Index
 union (Idx !a) (Idx !b) = Idx $ Set.union a b  
 
@@ -47,5 +49,6 @@ disjointUnion :: Index -> Index -> Index
 disjointUnion (Idx !a) (Idx !b) =
   Idx $ Set.difference (Set.union a b) (Set.intersection a b) 
 
+--{-# INLINE size #-}
 size :: Index -> Int
 size (Idx !a) = Set.size a
