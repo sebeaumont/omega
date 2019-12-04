@@ -9,7 +9,6 @@ import qualified Data.Set as Set
 import qualified Data.Vector.Unboxed as U
 import Data.SDM.VectorSpace.SparseVector
 
-
 -- | Dense bit vectors based on unboxed vectors where we pack the bits into `Word`s
 newtype DenseBitVector = DBVec (U.Vector Bit)
 
@@ -58,6 +57,10 @@ mergeWith _ []  = []
 denseZeroBVector :: Int -> DenseBitVector
 denseZeroBVector d = DBVec $ U.replicate d 0
 
+-- | we dont go all the way to `DenseBitVector` here in case we want to
+-- try different representations based on `Data.Vector.Unboxed` `Word`
+-- XXX or is this totally wrong way around? This isn't adding any abstraction.
+
 class Densify a where
   toDense:: a -> U.Vector Word
   
@@ -87,7 +90,7 @@ zerov = denseZeroBVector
 
 -- TODO contraction/expansion of bit runs...
 scalev :: Double -> DenseBitVector -> DenseBitVector
-scalev !x !v = v
+scalev _ !v = v
 
 
 --{-# INLINE superpose #-}

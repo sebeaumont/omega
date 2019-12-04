@@ -59,8 +59,20 @@ executable index
   build-depends:      base
                     , breeze
                     , text
+                    , criterion
   ghc-options:        -Wall -O3 -threaded
   hs-source-dirs:     tst
   main-is:            Main.hs
   default-language:   Haskell2010
+
+  
+-- executable search
+--   build-depends:      base
+--                     , breeze
+--                     , text
+--                     , criterion
+--   ghc-options:        -Wall -O3 -threaded
+--   hs-source-dirs:     tst
+--   main-is:            Search.hs
+--   default-language:   Haskell2010
            

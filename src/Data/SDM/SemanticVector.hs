@@ -12,6 +12,7 @@ p = 16
 d :: Int
 d = 32768
 
+-- TODO derive: Generic, Serialize, NFData for this and products
 -- | SemanticVector 
 -- one bit vector for basis and one the the superposed result
 data SemanticVector = SV { sK :: !SparseBitVector
@@ -30,7 +31,7 @@ super !u !sv = u { sV = superpose (sV u) sv }
 mutual :: [SemanticVector] -> [SemanticVector]
 mutual !vs = [super u mv | u <- vs] where
   mv = let !zv = bitVecFromList []
-       in foldl' add zv [sK v | v <- vs] 
+       in foldl' add zv [sK v | !v <- vs] 
 
 -- | Make a new SemanticVector - requires entropy for random number generation.
 makeSemanticVector :: MonadEntropy m => m SemanticVector

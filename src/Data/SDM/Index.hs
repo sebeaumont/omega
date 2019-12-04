@@ -8,33 +8,34 @@ import Data.SDM.SemanticVector
 import Data.SDM.Entropy
 import Data.List
 
+import Data.Text.Lazy (Text)
 import qualified Data.Text.Lazy as T
 import qualified Data.Text.Lazy.IO as TIO
 import Data.Text.Tokenize
 import qualified Data.HashMap.Strict as Map
 
 -- | Map from term tokens to SemanticVectors   
-type TokenMap = Map.HashMap T.Text SemanticVector
+type TokenMap = Map.HashMap Text SemanticVector
 
 -- | Update map with vector returning updated map
-updateVector :: TokenMap -> T.Text -> SemanticVector -> TokenMap
+updateVector :: TokenMap -> Text -> SemanticVector -> TokenMap
 updateVector m k v = Map.insert k v m
 
-updateVectors :: TokenMap -> [T.Text] -> [SemanticVector] -> TokenMap
+updateVectors :: TokenMap -> [Text] -> [SemanticVector] -> TokenMap
 updateVectors m (k:ks) (v:vs) =
   let m' = updateVector m k v in updateVectors m' ks vs
 updateVectors m [] _ = m
 updateVectors m _ [] = m  
 
 -- | Lookup token and return a SemanticVector either existing or new.
-ensureSemanticVector :: MonadEntropy m => TokenMap -> T.Text -> m (SemanticVector, TokenMap)
+ensureSemanticVector :: MonadEntropy m => TokenMap -> Text -> m (SemanticVector, TokenMap)
 ensureSemanticVector tm tok = 
   case Map.lookup tok tm of
     Nothing -> makeSemanticVector >>= \sv -> return (sv, Map.insert tok sv tm)
     Just sv' -> return (sv', tm)
 
 -- | Frame based indexing making sure updated map is used
-frameVectors :: MonadEntropy m => TokenMap -> [T.Text] -> m [(SemanticVector, TokenMap)]
+frameVectors :: MonadEntropy m => TokenMap -> [Text] -> m [(SemanticVector, TokenMap)]
 frameVectors tm (t:ts) = do
   (v, tm') <- ensureSemanticVector tm t
   rs <- frameVectors tm' ts
@@ -42,7 +43,7 @@ frameVectors tm (t:ts) = do
 frameVectors _ [] = return []
 
 -- | Index a frame
-indexFrame :: MonadEntropy m => TokenMap -> [T.Text] -> m TokenMap
+indexFrame :: MonadEntropy m => TokenMap -> [Text] -> m TokenMap
 indexFrame tm frame = do
   vectorMap <- frameVectors tm frame
   let vectors = map fst vectorMap
@@ -52,15 +53,15 @@ indexFrame tm frame = do
   return $ updateVectors tm' frame mv 
 
 -- | Index frames for side effects on TokenMap
-indexFrames :: MonadEntropy m => TokenMap -> [[T.Text]] -> m TokenMap
+indexFrames :: MonadEntropy m => TokenMap -> [[Text]] -> m TokenMap
 indexFrames tm (f:fs) = do
   tm' <- indexFrame tm f
   rs <- indexFrames tm' fs
   return $! rs
 indexFrames tm [] = return tm
 
--- | Index (lazy) text with given frame size and overlap
-indexText :: MonadEntropy m => T.Text -> Int -> Int -> m TokenMap
+-- | Index a text with given frame size and overlap
+indexText :: MonadEntropy m => Text -> Int -> Int -> m TokenMap
 indexText text fsize over =
   let fms = frames fsize over $ tokens text
   in indexFrames Map.empty fms
@@ -82,7 +83,7 @@ indexFile fp sz ov =
     indexFrames Map.empty fms
     
 -- | Select nearest neighbours with difference (normalised distance) below given threshold
-neighbours :: TokenMap -> SemanticVector -> Int -> Int -> [(T.Text, Int)]
+neighbours :: TokenMap -> SemanticVector -> Int -> Int -> [(Text, Int)]
 neighbours !m !v !s !n =
   let !v' = sV v
       !namedist = sortOn snd [(t, distance (sV u) v') | (t,u) <- Map.toList m]
@@ -90,6 +91,6 @@ neighbours !m !v !s !n =
     take n $ takeWhile (\(_,s') -> s' < s) namedist
 
 -- | Lookup a token in the map
-token :: TokenMap -> T.Text -> Maybe SemanticVector
+token :: TokenMap -> Text -> Maybe SemanticVector
 token m s = Map.lookup s m
 
