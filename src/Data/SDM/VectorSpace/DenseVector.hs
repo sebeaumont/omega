@@ -1,7 +1,12 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+
 module Data.SDM.VectorSpace.DenseVector where
 
+import GHC.Generics
+import Control.DeepSeq
 import Control.Monad.Primitive
 import Data.Bit
 import Data.Bits
@@ -10,13 +15,13 @@ import qualified Data.Vector.Unboxed as U
 import Data.SDM.VectorSpace.SparseVector
 
 -- | Dense bit vectors based on unboxed vectors where we pack the bits into `Word`s
-newtype DenseBitVector = DBVec (U.Vector Bit)
+newtype DenseBitVector = DBVec (U.Vector Bit) deriving (Generic, NFData)
 
 instance Show DenseBitVector where
   show (DBVec v) = "DBVec " ++ (show $ countBits v)
 
 -- | Modify in place semantics for BitVectors
-newtype DenseMBitVector m = DMBVec (U.MVector (PrimState m) Bit)
+newtype DenseMBitVector m = DMBVec (U.MVector (PrimState m) Bit) deriving (Generic, NFData)
 
 
 --{-# INLINE bitsPerWord #-}

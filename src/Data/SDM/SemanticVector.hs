@@ -1,5 +1,12 @@
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+
 module Data.SDM.SemanticVector where
+
+import GHC.Generics
+import Control.DeepSeq
+--import Data.Serialize
 
 import Data.List
 import Data.SDM.VectorSpace
@@ -17,7 +24,7 @@ d = 32768
 -- one bit vector for basis and one the the superposed result
 data SemanticVector = SV { sK :: !SparseBitVector
                          , sV :: !DenseBitVector
-                         } deriving (Show)
+                         } deriving (Show, Generic, NFData)
 
 -- | Superpose SemanticVector u with sparse vector
 super :: SemanticVector -> SparseBitVector -> SemanticVector

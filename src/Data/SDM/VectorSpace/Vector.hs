@@ -1,12 +1,18 @@
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+
 module Data.SDM.VectorSpace.Vector where
+
+import GHC.Generics
+import Control.DeepSeq
 
 import qualified Data.Set as Set
 import Data.Set (Set)
 
 -- | Types of Vectors with index sets
 
-newtype Index = Idx (Set Int) deriving (Show)
+newtype Index = Idx (Set Int) deriving (Show, Generic, NFData)
 
 newtype Vector v = Vect (Set (Int,v)) deriving (Show)
 

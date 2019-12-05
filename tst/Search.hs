@@ -3,12 +3,10 @@ module Main where
 
 import Criterion.Main
 import Data.SDM.Index
+import Data.SDM.SemanticVector
 
---
--- NOTA BONA - This would rely on stuff being evaluable to NF
--- and thus implementing NFData for our main data strucutres.
--- which might be an option but I'm not feeling up to it yet.
 
+setupEnv :: IO (TokenMap, SemanticVector)
 setupEnv = do 
   idx <- indexFile "dat/shakespeare.txt" 10 1
   let Just duchess = token idx "duchess"

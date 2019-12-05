@@ -6,5 +6,5 @@ import Data.SDM.Index
 
 main :: IO ()
 main = defaultMain [
-  bench "index" $ whnfIO (indexFile "dat/shakespeare.txt" 10 1)
+  bench "index" $ whnfAppIO (indexFile "dat/shakespeare.txt" 10) 1
   ]

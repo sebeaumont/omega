@@ -1,11 +1,17 @@
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+
 module Data.SDM.VectorSpace.SparseVector where
+
+import GHC.Generics
+import Control.DeepSeq
 
 import Data.Set (Set)
 import Data.SDM.VectorSpace.Vector
 
 -- | Sparse vectors.
-newtype SparseBitVector = BVec Index deriving (Show)
+newtype SparseBitVector = BVec Index deriving (Show, Generic, NFData)
 
 newtype SparseVector v = SVec (Vector v) deriving (Show)
 

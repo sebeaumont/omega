@@ -9,7 +9,6 @@ import Data.SDM.Entropy
 import Data.List
 
 import Data.Text.Lazy (Text)
-import qualified Data.Text.Lazy as T
 import qualified Data.Text.Lazy.IO as TIO
 import Data.Text.Tokenize
 import qualified Data.HashMap.Strict as Map
