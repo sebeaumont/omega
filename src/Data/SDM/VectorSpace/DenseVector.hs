@@ -62,16 +62,8 @@ mergeWith _ []  = []
 denseZeroBVector :: Int -> DenseBitVector
 denseZeroBVector d = DBVec $ U.replicate d 0
 
--- | we dont go all the way to `DenseBitVector` here in case we want to
--- try different representations based on `Data.Vector.Unboxed` `Word`
--- XXX or is this totally wrong way around? This isn't adding any abstraction.
-
-class Densify a where
-  toDense:: a -> U.Vector Word
-  
-instance Densify SparseBitVector where
-  {-# INLINE toDense #-}
-  toDense = bitVecToDense
+toDenseBitVector :: SparseBitVector -> DenseBitVector
+toDenseBitVector u = DBVec $ castFromWords $ bitVecToDense u
 
 -- metric
 distance :: DenseBitVector -> DenseBitVector -> Int  
@@ -97,20 +89,28 @@ zerov = denseZeroBVector
 scalev :: Double -> DenseBitVector -> DenseBitVector
 scalev _ !v = v
 
-
+{-
 --{-# INLINE superpose #-}
 superpose :: DenseBitVector -> SparseBitVector -> DenseBitVector
 superpose (DBVec !dv) !sv =
-  let !sv' = castFromWords $ toDense sv
+  let !sv' = castFromWords $ bitVecToDense sv
   in DBVec $ zipBits (.|.) dv sv'
+-}
 
--- | this would be the best speed up for indexing
+--{-# INLINE superpose #-}
+superpose :: DenseBitVector -> DenseBitVector -> DenseBitVector
+superpose (DBVec !v) (DBVec !u) = DBVec $ zipBits (.|.) v u
+
+{-
 
 superposeM :: PrimMonad m => SparseBitVector -> DenseMBitVector m  -> m ()
 superposeM !sv (DMBVec !dv) =
-  let sv' = castFromWords $ toDense sv
+  let sv' = castFromWords $ bitVecToDense sv
   in zipInPlace (.|.) sv' dv
+-}
 
-
+-- | this would be the best speed up for indexing!
+superposeM :: PrimMonad m => DenseBitVector -> DenseMBitVector m  -> m ()
+superposeM (DBVec !v) (DMBVec !u) = zipInPlace (.|.) v u
   
       
