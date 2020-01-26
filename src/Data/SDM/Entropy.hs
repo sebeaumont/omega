@@ -1,13 +1,15 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
--- | SDM the random index generator is central
--- we might consider different distributions but a uniform choice
--- modulo the dimensionality of the space is the current implmentation.
+-- | This random index generator is central to SDM.  We might consider
+-- different distributions but a uniform choice modulo the
+-- dimensionality of the space is the current implmentation for sparse
+-- random vectors.
 
 {-
 TODO
  - (uniform) randomChoice from index set [0..dim)
  - balanced/white domain value sets e.g. {0,-1,0}
+ - N.B. getRandomList is the rate limiting step so performance of this is critical
 -}
 
 module Data.SDM.Entropy ( withEntropy
@@ -32,7 +34,7 @@ initRNG = do RNG <$> Random.createSystemRandom
 data Environment = Env { envRNG :: RNG }
 
 
--- | thread access to sparse environment
+-- | Computation with access to current state of PRNG 
 newtype Entropy a = Entropy (ReaderT Environment IO a)
   deriving (Functor, Applicative, Monad, MonadIO, MonadReader Environment)
 
@@ -47,8 +49,8 @@ instance MonadEntropy Entropy where
 withEntropy :: Entropy a -> IO a
 withEntropy (Entropy s) = liftIO initRNG >>= \r -> runReaderT s (Env r) 
   
--- | The vector needs to be constrained to a type `Random.Variate` which ahs enough capacity
--- for the upper bound or dimension d.
+-- | The list of `n` random element needs to be constrained to a type `Random.Variate` which has enough capacity
+-- for the upper bound (sparse dimension) `d`.
 
 getRandomList :: (MonadEntropy m, Random.Variate a, Integral a) => Int -> a -> m [a]
 getRandomList n d = liftEntropy $ Entropy $ do

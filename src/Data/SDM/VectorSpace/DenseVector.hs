@@ -23,6 +23,7 @@ instance Show DenseBitVector where
 -- | Modify in place semantics for BitVectors
 newtype DenseMBitVector m = DMBVec (U.MVector (PrimState m) Bit) deriving (Generic, NFData)
 
+-- could move all this sparse->dense code out to its own module --
 
 --{-# INLINE bitsPerWord #-}
 bitsPerWord :: Integral a => a
