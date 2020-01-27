@@ -28,10 +28,10 @@ newtype RNG = RNG Gen
 
 -- | Init the RNG and let the entropy flow
 initRNG ::  IO RNG
-initRNG = do RNG <$> Random.createSystemRandom
+initRNG = RNG <$> Random.createSystemRandom
 
--- | We may want more here in due course...
-data Environment = Env { envRNG :: RNG }
+-- | We may want more here in due course... meanwhile use newtype
+newtype Environment = Env { envRNG :: RNG }
 
 
 -- | Computation with access to current state of PRNG 

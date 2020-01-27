@@ -8,6 +8,7 @@ module Data.SDM.VectorSpace.DenseVector where
 import GHC.Generics
 import Control.DeepSeq
 import Control.Monad.Primitive
+
 import Data.Bit
 import Data.Bits
 import qualified Data.Set as Set
