@@ -1,0 +1,118 @@
+	Tue Nov 26 22:00 2019 Time and Allocation Profiling Report  (Final)
+
+	   index +RTS -p -RTS
+
+	total time  =       46.09 secs   (46093 ticks @ 1000 us, 1 processor)
+	total alloc = 31,175,594,632 bytes  (excludes profiling overheads)
+
+COST CENTRE   MODULE               SRC                                           %time %alloc
+
+add           Data.SDM.VectorSpace src/Data/SDM/VectorSpace.hs:(115,1)-(126,34)   62.0   59.2
+distance      Data.SDM.VectorSpace src/Data/SDM/VectorSpace.hs:(203,1)-(204,72)   36.0   37.2
+getRandomList Data.SDM.Entropy     src/Data/SDM/Entropy.hs:(54,1)-(56,42)          0.9    1.7
+
+
+                                                                                                                                                         individual      inherited
+COST CENTRE                        MODULE                            SRC                                                              no.     entries  %time %alloc   %time %alloc
+
+MAIN                               MAIN                              <built-in>                                                       260          0    0.0    0.0   100.0  100.0
+ CAF                               Main                              <entire-module>                                                  519          0    0.0    0.0     0.0    0.0
+  main                             Main                              tst/Main.hs:(7,1)-(10,39)                                        520          1    0.0    0.0     0.0    0.0
+   unstreamChunks/outer            Data.Text.Internal.Lazy.Fusion    libraries/text/Data/Text/Internal/Lazy/Fusion.hs:(62,15)-(68,43) 598          2    0.0    0.0     0.0    0.0
+    unstreamChunks/inner           Data.Text.Internal.Lazy.Fusion    libraries/text/Data/Text/Internal/Lazy/Fusion.hs:(79,17)-(83,59) 599          4    0.0    0.0     0.0    0.0
+     unstreamChunks/resize         Data.Text.Internal.Lazy.Fusion    libraries/text/Data/Text/Internal/Lazy/Fusion.hs:(72,72)-(76,38) 600          1    0.0    0.0     0.0    0.0
+   indexFile                       Data.SDM.Index                    src/Data/SDM/Index.hs:(137,1)-(141,29)                           522          1    0.0    0.0     0.0    0.0
+    withEntropy                    Data.SDM.Entropy                  src/Data/SDM/Entropy.hs:48:1-71                                  523          1    0.0    0.0     0.0    0.0
+ CAF                               Data.SDM.Index                    <entire-module>                                                  516          0    0.0    0.0     0.0    0.0
+  d                                Data.SDM.Index                    src/Data/SDM/Index.hs:41:1-9                                     560          1    0.0    0.0     0.0    0.0
+  makeSemanticVector               Data.SDM.Index                    src/Data/SDM/Index.hs:(81,1)-(84,23)                             553          1    0.0    0.0     0.0    0.0
+   makeSparseRandomBitVector       Data.SDM.VectorSpace              src/Data/SDM/VectorSpace.hs:36:1-79                              555          1    0.0    0.0     0.0    0.0
+    getRandomList                  Data.SDM.Entropy                  src/Data/SDM/Entropy.hs:(54,1)-(56,42)                           557          1    0.0    0.0     0.0    0.0
+  p                                Data.SDM.Index                    src/Data/SDM/Index.hs:38:1-6                                     559          1    0.0    0.0     0.0    0.0
+ CAF                               Data.Text.Tokenize                <entire-module>                                                  515          0    0.0    0.0     0.0    0.0
+  tokens                           Data.Text.Tokenize                src/Data/Text/Tokenize.hs:9:1-59                                 581          0    0.0    0.0     0.0    0.0
+   unstreamChunks/outer            Data.Text.Internal.Lazy.Fusion    libraries/text/Data/Text/Internal/Lazy/Fusion.hs:(62,15)-(68,43) 582          1    0.0    0.0     0.0    0.0
+ CAF                               Data.HashMap.Base                 <entire-module>                                                  513          0    0.0    0.0     0.0    0.0
+  bitsPerSubkey                    Data.HashMap.Base                 Data/HashMap/Base.hs:1858:1-17                                   566          1    0.0    0.0     0.0    0.0
+  empty                            Data.HashMap.Base                 Data/HashMap/Base.hs:464:1-13                                    552          1    0.0    0.0     0.0    0.0
+ CAF                               Data.Text.Array                   <entire-module>                                                  508          0    0.0    0.0     0.0    0.0
+ CAF                               System.Random.MWC                 <entire-module>                                                  483          0    0.0    0.0     0.0    0.0
+  createSystemRandom               System.Random.MWC                 System/Random/MWC.hs:438:1-67                                    526          1    0.0    0.0     0.0    0.0
+   withSystemRandom                System.Random.MWC                 System/Random/MWC.hs:(422,1)-(433,27)                            527          1    0.0    0.0     0.0    0.0
+  withSystemRandom                 System.Random.MWC                 System/Random/MWC.hs:(422,1)-(433,27)                            530          0    0.0    0.0     0.0    0.0
+   acquireSeedSystem               System.Random.MWC.SeedSource      System/Random/MWC/SeedSource.hs:(42,1)-(48,39)                   531          1    0.0    0.0     0.0    0.0
+   sizeOf                          Data.Primitive.Types              Data/Primitive/Types.hs:131:1-25                                 533          1    0.0    0.0     0.0    0.0
+ CAF                               System.Random.MWC.SeedSource      <entire-module>                                                  482          0    0.0    0.0     0.0    0.0
+ CAF                               Data.Primitive.MachDeps           <entire-module>                                                  455          0    0.0    0.0     0.0    0.0
+  sIZEOF_WORD32                    Data.Primitive.MachDeps           Data/Primitive/MachDeps.hs:107:1-17                              534          1    0.0    0.0     0.0    0.0
+ CAF                               GHC.Conc.Signal                   <entire-module>                                                  365          0    0.0    0.0     0.0    0.0
+ CAF                               GHC.Float                         <entire-module>                                                  356          0    0.0    0.0     0.0    0.0
+ CAF                               GHC.IO.Encoding                   <entire-module>                                                  346          0    0.0    0.0     0.0    0.0
+ CAF                               GHC.IO.Encoding.Iconv             <entire-module>                                                  344          0    0.0    0.0     0.0    0.0
+ CAF                               GHC.IO.Exception                  <entire-module>                                                  338          0    0.0    0.0     0.0    0.0
+ CAF                               GHC.IO.FD                         <entire-module>                                                  337          0    0.0    0.0     0.0    0.0
+ CAF                               GHC.IO.Handle.FD                  <entire-module>                                                  335          0    0.0    0.0     0.0    0.0
+ CAF                               GHC.IO.Handle.Internals           <entire-module>                                                  334          0    0.0    0.0     0.0    0.0
+ CAF                               GHC.IO.Handle.Text                <entire-module>                                                  333          0    0.0    0.0     0.0    0.0
+ CAF                               GHC.Event.Poll                    <entire-module>                                                  279          0    0.0    0.0     0.0    0.0
+ CAF                               GHC.Event.Thread                  <entire-module>                                                  278          0    0.0    0.0     0.0    0.0
+ main                              Main                              tst/Main.hs:(7,1)-(10,39)                                        521          0    0.0    0.0   100.0  100.0
+  neighbours                       Data.SDM.Index                    src/Data/SDM/Index.hs:(148,1)-(152,42)                           583          1    0.0    0.0    36.1   37.2
+   sV                              Data.SDM.Index                    src/Data/SDM/Index.hs:49:28-29                                   584      13083    0.0    0.0     0.0    0.0
+   difference                      Data.SDM.VectorSpace              src/Data/SDM/VectorSpace.hs:212:1-74                             594      13082    0.0    0.0    36.1   37.2
+    dims                           Data.SDM.VectorSpace              src/Data/SDM/VectorSpace.hs:(185,1)-(186,20)                     603      13082    0.0    0.0     0.0    0.0
+    distance                       Data.SDM.VectorSpace              src/Data/SDM/VectorSpace.hs:(203,1)-(204,72)                     595      13082   36.0   37.2    36.0   37.2
+  token                            Data.SDM.Index                    src/Data/SDM/Index.hs:156:1-26                                   596          1    0.0    0.0     0.0    0.0
+   hash                            Data.HashMap.Base                 Data/HashMap/Base.hs:166:1-28                                    597          1    0.0    0.0     0.0    0.0
+    hashByteArrayWithSalt          Data.Hashable.Class               Data/Hashable/Class.hs:(770,1)-(772,20)                          601          1    0.0    0.0     0.0    0.0
+   sparseIndex                     Data.HashMap.Base                 Data/HashMap/Base.hs:1867:1-42                                   602          1    0.0    0.0     0.0    0.0
+  indexFile                        Data.SDM.Index                    src/Data/SDM/Index.hs:(137,1)-(141,29)                           524          0    0.0    0.0    63.9   62.8
+   withEntropy                     Data.SDM.Entropy                  src/Data/SDM/Entropy.hs:48:1-71                                  525          0    0.0    0.0    63.9   62.8
+    frames                         Data.Text.Tokenize                src/Data/Text/Tokenize.hs:(21,1)-(23,18)                         542      11260    0.0    0.0     0.0    0.0
+    indexFrames                    Data.SDM.Index                    src/Data/SDM/Index.hs:(113,1)-(117,29)                           543      11260    0.0    0.0    63.4   61.8
+     indexFrame                    Data.SDM.Index                    src/Data/SDM/Index.hs:(103,1)-(109,37)                           544      11259    0.0    0.1    63.4   61.8
+      frameVectors                 Data.SDM.Index                    src/Data/SDM/Index.hs:(95,1)-(99,29)                             545     236426    0.0    0.0     1.2    1.9
+       ensureSemanticVector        Data.SDM.Index                    src/Data/SDM/Index.hs:(88,1)-(91,32)                             546     225167    0.1    0.0     1.2    1.9
+        sparseIndex                Data.HashMap.Base                 Data/HashMap/Base.hs:1867:1-42                                   570     360059    0.0    0.0     0.0    0.0
+        hash                       Data.HashMap.Base                 Data/HashMap/Base.hs:166:1-28                                    547     225167    0.0    0.0     0.0    0.0
+         hashByteArrayWithSalt     Data.Hashable.Class               Data/Hashable/Class.hs:(770,1)-(772,20)                          551     225162    0.0    0.0     0.0    0.0
+        insert                     Data.HashMap.Strict.Base          Data/HashMap/Strict/Base.hs:139:1-27                             561      13082    0.0    0.0     0.0    0.0
+         insert                    Data.HashMap.Base                 Data/HashMap/Base.hs:656:1-37                                    562      13082    0.0    0.0     0.0    0.0
+          hash                     Data.HashMap.Base                 Data/HashMap/Base.hs:166:1-28                                    563      13082    0.0    0.0     0.0    0.0
+           hashByteArrayWithSalt   Data.Hashable.Class               Data/Hashable/Class.hs:(770,1)-(772,20)                          564      13081    0.0    0.0     0.0    0.0
+          insert'                  Data.HashMap.Base                 Data/HashMap/Base.hs:(660,1)-(691,76)                            565      13082    0.0    0.0     0.0    0.0
+           sparseIndex             Data.HashMap.Base                 Data/HashMap/Base.hs:1867:1-42                                   569      17636    0.0    0.0     0.0    0.0
+           copy                    Data.HashMap.Array                Data/HashMap/Array.hs:(328,1)-(333,30)                           568      17032    0.0    0.0     0.0    0.0
+           new_                    Data.HashMap.Array                Data/HashMap/Array.hs:256:1-28                                   567       8516    0.0    0.0     0.0    0.0
+        makeSemanticVector         Data.SDM.Index                    src/Data/SDM/Index.hs:(81,1)-(84,23)                             554          0    0.0    0.0     1.0    1.8
+         bVecFromList              Data.SDM.VectorSpace              src/Data/SDM/VectorSpace.hs:68:1-47                              592      13082    0.0    0.0     0.0    0.0
+         makeSparseRandomBitVector Data.SDM.VectorSpace              src/Data/SDM/VectorSpace.hs:36:1-79                              556          0    0.1    0.1     1.0    1.8
+          getRandomList            Data.SDM.Entropy                  src/Data/SDM/Entropy.hs:(54,1)-(56,42)                           558          0    0.9    1.7     0.9    1.7
+      updateVectors                Data.SDM.Index                    src/Data/SDM/Index.hs:(74,1)-(77,24)                             571     236426    0.0    0.0     0.2    0.6
+       updateVector                Data.SDM.Index                    src/Data/SDM/Index.hs:71:1-37                                    574     225167    0.0    0.0     0.1    0.6
+        insert                     Data.HashMap.Strict.Base          Data/HashMap/Strict/Base.hs:139:1-27                             575     225167    0.0    0.0     0.1    0.6
+         insert                    Data.HashMap.Base                 Data/HashMap/Base.hs:656:1-37                                    576     225167    0.0    0.0     0.1    0.6
+          hash                     Data.HashMap.Base                 Data/HashMap/Base.hs:166:1-28                                    577     225167    0.0    0.0     0.0    0.0
+           hashByteArrayWithSalt   Data.Hashable.Class               Data/Hashable/Class.hs:(770,1)-(772,20)                          578     225162    0.0    0.0     0.0    0.0
+          insert'                  Data.HashMap.Base                 Data/HashMap/Base.hs:(660,1)-(691,76)                            579     225167    0.1    0.5     0.1    0.5
+           sparseIndex             Data.HashMap.Base                 Data/HashMap/Base.hs:1867:1-42                                   580     373279    0.0    0.0     0.0    0.0
+      mutual                       Data.SDM.Index                    src/Data/SDM/Index.hs:(62,1)-(64,39)                             572      11259    0.0    0.1    62.0   59.3
+       add                         Data.SDM.VectorSpace              src/Data/SDM/VectorSpace.hs:(115,1)-(126,34)                     589     225167    2.7    3.6     2.7    3.6
+       sK                          Data.SDM.Index                    src/Data/SDM/Index.hs:48:28-29                                   588     225167    0.0    0.0     0.0    0.0
+       super                       Data.SDM.Index                    src/Data/SDM/Index.hs:54:1-37                                    573     225167    0.0    0.0    59.3   55.7
+        add                        Data.SDM.VectorSpace              src/Data/SDM/VectorSpace.hs:(115,1)-(126,34)                     586     205758   59.2   55.6    59.2   55.6
+        sV                         Data.SDM.Index                    src/Data/SDM/Index.hs:49:28-29                                   585     205758    0.0    0.0     0.0    0.0
+       bVecFromList                Data.SDM.VectorSpace              src/Data/SDM/VectorSpace.hs:68:1-47                              587      11259    0.0    0.0     0.0    0.0
+    readTextDevice                 Data.Text.Internal.IO             libraries/text/Data/Text/Internal/IO.hs:133:39-64                541        546    0.0    0.0     0.0    0.0
+    tokens                         Data.Text.Tokenize                src/Data/Text/Tokenize.hs:9:1-59                                 540          1    0.2    0.4     0.4    0.9
+     unstreamChunks/outer          Data.Text.Internal.Lazy.Fusion    libraries/text/Data/Text/Internal/Lazy/Fusion.hs:(62,15)-(68,43) 548     405292    0.1    0.1     0.2    0.5
+      unstreamChunks/inner         Data.Text.Internal.Lazy.Fusion    libraries/text/Data/Text/Internal/Lazy/Fusion.hs:(79,17)-(83,59) 549     857318    0.1    0.4     0.2    0.4
+       unstreamChunks/resize       Data.Text.Internal.Lazy.Fusion    libraries/text/Data/Text/Internal/Lazy/Fusion.hs:(72,72)-(76,38) 550     190376    0.0    0.0     0.0    0.0
+    createSystemRandom             System.Random.MWC                 System/Random/MWC.hs:438:1-67                                    528          0    0.0    0.0     0.0    0.0
+     withSystemRandom              System.Random.MWC                 System/Random/MWC.hs:(422,1)-(433,27)                            529          0    0.0    0.0     0.0    0.0
+      unId                         Data.Vector.Fusion.Util           Data/Vector/Fusion/Util.hs:25:21-24                              535        514    0.0    0.0     0.0    0.0
+      sizeOf                       Data.Primitive.Types              Data/Primitive/Types.hs:131:1-25                                 538         19    0.0    0.0     0.0    0.0
+      sChunks                      Data.Vector.Fusion.Bundle.Monadic Data/Vector/Fusion/Bundle/Monadic.hs:122:30-36                   539          1    0.0    0.0     0.0    0.0
+      sSize                        Data.Vector.Fusion.Bundle.Monadic Data/Vector/Fusion/Bundle/Monadic.hs:124:30-34                   537          1    0.0    0.0     0.0    0.0
+      upperBound                   Data.Vector.Fusion.Bundle.Size    Data/Vector/Fusion/Bundle/Size.hs:(118,1)-(120,30)               536          1    0.0    0.0     0.0    0.0
+      acquireSeedSystem            System.Random.MWC.SeedSource      System/Random/MWC/SeedSource.hs:(42,1)-(48,39)                   532          0    0.0    0.0     0.0    0.0

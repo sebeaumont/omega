@@ -1,0 +1,1 @@
+cabal repl --repl-options=-ddump-simpl --repl-options=-dsuppress-all
