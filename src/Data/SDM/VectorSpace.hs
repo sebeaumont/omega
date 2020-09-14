@@ -16,6 +16,7 @@ module Data.SDM.VectorSpace ( module Data.SDM.VectorSpace.Vector
 
 import Control.Monad.Reader
 import Control.Monad.Identity
+
 import Data.SDM.VectorSpace.Vector
 import Data.SDM.VectorSpace.SparseVector
 import Data.SDM.VectorSpace.SparseRandom

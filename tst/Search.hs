@@ -5,7 +5,6 @@ import Criterion.Main
 import Data.SDM.Index
 import Data.SDM.SemanticVector
 
-
 setupEnv :: IO (TokenMap, SemanticVector)
 setupEnv = do 
   idx <- indexFile "dat/shakespeare.txt" 10 1

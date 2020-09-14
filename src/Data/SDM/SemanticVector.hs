@@ -14,8 +14,8 @@ import Data.SDM.Entropy
 
 -- vector space dimensions and number of bits in sparse random vector
 
--- TODO add these to our context Reader monad and start using it
--- maybe stacked on MonadEntropy -- the p value could live in there
+-- TODO add these to our Reader monad and start using it
+-- perhaps stacked on MonadEntropy -- the p value could live in there
 -- (as a [0,1] real) and D sit in the space context. We also need to
 -- play with contraction and non Nat dimensionality...
 
