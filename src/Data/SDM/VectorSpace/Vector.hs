@@ -12,7 +12,7 @@ import Data.Set (Set)
 
 -- | Types of Vectors with index sets
 
-newtype Index = Idx (Set Int) deriving (Show, Generic, NFData)
+newtype Idx = Idx (Set Int) deriving (Show, Generic, NFData)
 
 newtype Vector v = Vect (Set (Int,v)) deriving (Show)
 
@@ -21,14 +21,14 @@ newtype Matrix v = Mat (Set (Int,Int,v)) deriving (Show)
 
 -- constructor helpers
 
-toIndex :: [Int] -> Index
+toIndex :: [Int] -> Idx
 toIndex !ix = Idx $ Set.fromList ix
 
 --{-# INLINE indexSet #-}
-indexSet :: Index -> Set Int
+indexSet :: Idx -> Set Int
 indexSet (Idx !i) = i
 
-indexToList :: Index -> [Int]
+indexToList :: Idx -> [Int]
 indexToList (Idx !i) = Set.toList i 
 
 toVector :: Ord b => [Int] -> [b] -> Vector b
@@ -45,16 +45,16 @@ toZeros = toInitVector 0
 
 --
 --{-# INLINE union #-}
-union :: Index -> Index -> Index
+union :: Idx -> Idx -> Idx
 union (Idx !a) (Idx !b) = Idx $ Set.union a b  
 
-diff :: Index -> Index -> Index
+diff :: Idx -> Idx -> Idx
 diff (Idx !a) (Idx !b) = Idx $ Set.difference a b  
 
-disjointUnion :: Index -> Index -> Index
+disjointUnion :: Idx -> Idx -> Idx
 disjointUnion (Idx !a) (Idx !b) =
   Idx $ Set.difference (Set.union a b) (Set.intersection a b) 
 
 --{-# INLINE size #-}
-size :: Index -> Int
+size :: Idx -> Int
 size (Idx !a) = Set.size a

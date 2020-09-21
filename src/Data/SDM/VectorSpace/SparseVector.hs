@@ -11,7 +11,7 @@ import Data.Set (Set)
 import Data.SDM.VectorSpace.Vector
 
 -- | Sparse vectors.
-newtype SparseBitVector = BVec Index deriving (Show, Generic, NFData)
+newtype SparseBitVector = BVec Idx deriving (Show, Generic, NFData)
 
 newtype SparseVector v = SVec (Vector v) deriving (Show)
 

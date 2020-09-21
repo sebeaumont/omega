@@ -2,7 +2,7 @@
 module Main where
 
 import Criterion.Main
-import Data.SDM.Index
+import Data.SDM.SemanticMap
 
 main :: IO ()
 main = defaultMain [
