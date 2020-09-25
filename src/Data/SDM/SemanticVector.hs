@@ -25,7 +25,7 @@ p = 16
 d :: Int
 d = 32768
 
--- TODO derive: Generic, Serialize, NFData for this and products
+
 -- | SemanticVector - one bit vector for basis and one the the superposed result.
 data SemanticVector = SV { sK :: !DenseBitVector
                          , sV :: !DenseBitVector

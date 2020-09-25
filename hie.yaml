@@ -1,1 +1,13 @@
-cradle: {cabal: {component: "lib:breeze"}}
+cradle:
+  cabal:
+    - path: "src"
+      component: "lib:breeze"
+
+    - path: "utl/words.hs"
+      component: "breeze:exe:words"
+
+    - path: "tst/Main.hs"
+      component: "breeze:exe:index"
+
+    - path: "tst/Search.hs"
+      component: "breeze:exe:search"

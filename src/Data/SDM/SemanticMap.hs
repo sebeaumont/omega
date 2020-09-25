@@ -15,8 +15,8 @@ import Data.Text.Tokenize
 import qualified Data.HashMap.Strict as Map
 import Control.DeepSeq (NFData)
 
--- TODO rename both the module and this type and factor out the core map updating
--- relevant function should be obvious from this newtype/c'tor usage below...
+-- factor out some of this relevant function should be obvious from this newtype/c'tor usage below...
+-- could use the same type to map to sparse vectors for graphs/hypergraphs...
 
 -- | More powerful type for SemanticMap
 newtype SemanticMap a = SemanticMap (Map.HashMap a SemanticVector) deriving (NFData)
