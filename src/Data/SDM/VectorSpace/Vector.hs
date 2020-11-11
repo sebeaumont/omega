@@ -1,6 +1,7 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE Strict #-}
 
 module Data.SDM.VectorSpace.Vector
   ( Idx
@@ -21,8 +22,8 @@ module Data.SDM.VectorSpace.Vector
   , size
   ) where
 
-import GHC.Generics
-import Control.DeepSeq
+import GHC.Generics ( Generic )
+import Control.DeepSeq ( NFData )
 
 import qualified Data.Set as Set
 import Data.Set (Set)
@@ -30,17 +31,20 @@ import Data.Set (Set)
 -- | Types of Vectors with index sets whihc can represent
 -- both sparse and dense vectors.
 
-newtype Idx = Idx (Set Int) deriving (Show, Generic, NFData)
+newtype Idx = Idx (Set Int) 
+  deriving (Show, Generic, NFData)
 
-newtype Vector v = Vect (Set (Int, v)) deriving (Show)
+newtype Vector v = Vect (Set (Int, v))
+  deriving (Show, Generic, NFData)
 
-newtype Matrix v = Mat (Set (Int, Int, v)) deriving (Show)
+newtype Matrix v = Mat (Set (Int, Int, v)) 
+  deriving (Show, Generic, NFData)
 
 
 -- constructor helpers
 
 toIndex :: [Int] -> Idx
-toIndex !ix = Idx $ Set.fromList ix
+toIndex ix = Idx $ Set.fromList ix
 
 indexSet :: Idx -> Set Int
 indexSet (Idx !i) = i
@@ -49,7 +53,7 @@ indexList :: Idx -> [Int]
 indexList (Idx !i) = Set.toList i 
 
 toVector :: Ord b => [Int] -> [b] -> Vector b
-toVector !i !v = Vect $ Set.fromList $ zip i v
+toVector i v = Vect $ Set.fromList $ zip i v
 
 vectorIV :: Vector v -> [(Int,v)]
 vectorIV (Vect !iv) = Set.toList iv
@@ -58,7 +62,7 @@ fromIV :: (Ord v, Num v) => [(Int,v)] -> Vector v
 fromIV ps = Vect $ Set.fromList ps
 
 fromInitList :: (Ord v, Num v) => v -> [Int] -> Vector v
-fromInitList !v !ix = toVector ix (repeat v)
+fromInitList v ix = toVector ix (repeat v)
 
 withZeros :: (Ord v, Num v) => [Int] -> Vector v
 withZeros = fromInitList 0

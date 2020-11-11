@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE Strict #-}
 
 module Data.SDM.VectorSpace.DenseVector where
 
@@ -19,7 +20,7 @@ import Data.SDM.VectorSpace.SparseVector
 newtype DenseBitVector = DBVec (U.Vector Bit) deriving (Generic, NFData)
 
 instance Show DenseBitVector where
-  show (DBVec v) = "DBVec " ++ (show $ countBits v)
+  show (DBVec v) = "DBVec " ++ show  (countBits v)
 
 -- | Modify in place semantics for BitVectors
 newtype DenseMBitVector m = DMBVec (U.MVector (PrimState m) Bit) deriving (Generic, NFData)
@@ -32,24 +33,24 @@ bitsPerWord = round $ logBase 2 (fromIntegral (maxBound :: Word) :: Double)
 
 -- {-# INLINE exp2 -#}
 exp2 :: Int -> Word
-exp2 !n = shiftL 1 n
+exp2 = shiftL 1
 
 --{-# INLINE wordBit #-}
 wordBit :: Int -> (Int, Word)
-wordBit !n = let (!i,!j) = divMod n bitsPerWord in (i, exp2 j) 
+wordBit n = let (!i,!j) = divMod n bitsPerWord in (i, exp2 j) 
 
 --{-# INLINE bitIndexes #-}
 bitIndexes :: SparseBitVector -> (Int, [(Int, Word)])
 bitIndexes !bv =
-  let !maxi = Set.findMax (index bv) `div` bitsPerWord
-      !idx = [wordBit i | i <- Set.elems $ index bv]
+  let maxi = Set.findMax (index bv) `div` bitsPerWord
+      idx = [wordBit i | i <- Set.elems $ index bv]
   in (maxi, mergeWith (.|.) idx)
 
 --{-# INLiNE bitVecToDense #-}    
 bitVecToDense ::  SparseBitVector -> U.Vector Word
 bitVecToDense !bv =
   let (!size, !wib) = bitIndexes bv
-      !vector = U.replicate (fromIntegral (size+1)) 0
+      vector = U.replicate (fromIntegral (size+1)) 0
   in vector U.// wib
 
 --{-# INLINE mergeWith #-}
@@ -89,7 +90,7 @@ zerov = denseZeroBVector
 
 -- TODO contraction/expansion of bit runs...
 scalev :: Double -> DenseBitVector -> DenseBitVector
-scalev _ !v = v
+scalev _ v = v
 
 {-
 --{-# INLINE superpose #-}
@@ -115,4 +116,3 @@ superposeM !sv (DMBVec !dv) =
 superposeM :: PrimMonad m => DenseBitVector -> DenseMBitVector m  -> m ()
 superposeM (DBVec !v) (DMBVec !u) = zipInPlace (.|.) v u
   
-      
