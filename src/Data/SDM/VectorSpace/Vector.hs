@@ -1,6 +1,4 @@
 {-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE Strict #-}
 
 module Data.SDM.VectorSpace.Vector
@@ -22,9 +20,6 @@ module Data.SDM.VectorSpace.Vector
   , size
   ) where
 
-import GHC.Generics ( Generic )
-import Control.DeepSeq ( NFData )
-
 import qualified Data.Set as Set
 import Data.Set (Set)
 
@@ -32,13 +27,13 @@ import Data.Set (Set)
 -- both sparse and dense vectors.
 
 newtype Idx = Idx (Set Int) 
-  deriving (Show, Generic, NFData)
+  deriving (Show)
 
 newtype Vector v = Vect (Set (Int, v))
-  deriving (Show, Generic, NFData)
+  deriving (Show)
 
 newtype Matrix v = Mat (Set (Int, Int, v)) 
-  deriving (Show, Generic, NFData)
+  deriving (Show)
 
 
 -- constructor helpers

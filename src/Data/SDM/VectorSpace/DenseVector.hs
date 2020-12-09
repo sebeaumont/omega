@@ -30,14 +30,16 @@ newtype DenseMBitVector m = DMBVec (U.MVector (PrimState m) Bit) deriving (Gener
 --{-# INLINE bitsPerWord #-}
 bitsPerWord :: Integral a => a
 bitsPerWord = round $ logBase 2 (fromIntegral (maxBound :: Word) :: Double)
+{-# INLINE bitsPerWord #-}
 
--- {-# INLINE exp2 -#}
 exp2 :: Int -> Word
 exp2 = shiftL 1
+{-# INLINE exp2 #-}
 
---{-# INLINE wordBit #-}
+
 wordBit :: Int -> (Int, Word)
 wordBit n = let (!i,!j) = divMod n bitsPerWord in (i, exp2 j) 
+{-# INLINE wordBit #-}
 
 --{-# INLINE bitIndexes #-}
 bitIndexes :: SparseBitVector -> (Int, [(Int, Word)])
@@ -46,14 +48,14 @@ bitIndexes !bv =
       idx = [wordBit i | i <- Set.elems $ index bv]
   in (maxi, mergeWith (.|.) idx)
 
---{-# INLiNE bitVecToDense #-}    
+
 bitVecToDense ::  SparseBitVector -> U.Vector Word
 bitVecToDense !bv =
   let (!size, !wib) = bitIndexes bv
       vector = U.replicate (fromIntegral (size+1)) 0
   in vector U.// wib
+{-# INLINE bitVecToDense #-}    
 
---{-# INLINE mergeWith #-}
 mergeWith :: Ord a => (b -> b -> b) -> [(a, b)] -> [(a, b)]
 mergeWith f ((i1,v1):(i2,v2):rs) 
   | i1 == i2 = let m = (i1, f v1 v2) in mergeWith f (m:rs)
@@ -61,29 +63,36 @@ mergeWith f ((i1,v1):(i2,v2):rs)
 mergeWith _ l@[(_,_)] = l  
 mergeWith _ []  = []  
 
---{-# INLINE denseZeroBVector #-}
+
 denseZeroBVector :: Int -> DenseBitVector
 denseZeroBVector d = DBVec $ U.replicate d 0
+{-# INLINE denseZeroBVector #-}
 
 toDenseBitVector :: SparseBitVector -> DenseBitVector
 toDenseBitVector u = DBVec $ castFromWords $ bitVecToDense u
+{-# INLINE toDenseBitVector #-}
 
 -- metric
 distance :: DenseBitVector -> DenseBitVector -> Int  
 distance (DBVec !u) (DBVec !v) = countBits $ zipBits xor u v
+{-# INLINE distance #-}
 
 -- algebra
 andv :: DenseBitVector -> DenseBitVector -> DenseBitVector
 andv (DBVec !u) (DBVec !v) = DBVec $ zipBits (.&.) u v 
+{-# INLINE andv #-}
 
 orv :: DenseBitVector -> DenseBitVector -> DenseBitVector
 orv (DBVec !u) (DBVec !v) = DBVec $ zipBits (.|.) u v 
+{-# INLINE orv #-}
 
 xorv :: DenseBitVector -> DenseBitVector -> DenseBitVector
 xorv (DBVec !u) (DBVec !v) = DBVec $ zipBits xor u v 
+{-# INLINE xorv #-}
 
 negv :: DenseBitVector -> DenseBitVector
 negv (DBVec !u) = DBVec $ invertBits u
+{-# INLINE negv #-}
 
 zerov :: Int -> DenseBitVector
 zerov = denseZeroBVector

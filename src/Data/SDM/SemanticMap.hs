@@ -1,5 +1,6 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE Strict #-}
 
 module Data.SDM.SemanticMap where
 
@@ -18,7 +19,8 @@ import Data.Text.Tokenize
 -- could use the same type to map to sparse vectors for graphs/hypergraphs...
 
 -- | More powerful type for SemanticMap
-newtype SemanticMap a = SemanticMap (Map.HashMap a SemanticVector) deriving (NFData)
+newtype SemanticMap a = SemanticMap (Map.HashMap a SemanticVector)
+  deriving (NFData)
 
 -- | Map from term tokens to SemanticVectors
 type TokenMap = SemanticMap Text
@@ -43,8 +45,8 @@ ensureSemanticVector (SemanticMap tm) tok =
 -- | Frame based indexing making sure updated map is used
 frameVectors :: MonadEntropy m => TokenMap -> [Text] -> m [(SemanticVector, TokenMap)]
 frameVectors tm (t : ts) = do
-  (v, tm') <- ensureSemanticVector tm t
-  rs <- frameVectors tm' ts
+  (!v, !tm') <- ensureSemanticVector tm t
+  !rs <- frameVectors tm' ts
   return $! (v, tm') : rs
 frameVectors _ [] = return []
 
@@ -99,3 +101,12 @@ neighbours (SemanticMap m) !v !s !n =
 -- | Lookup a token in the map
 token :: TokenMap -> Text -> Maybe SemanticVector
 token (SemanticMap m) !s = Map.lookup s m
+
+
+-- | Convenience for lookups
+neighbourhood :: TokenMap -> Text -> Double -> Int -> Maybe [(Text, Int)]
+neighbourhood tm tok p n = do
+  source <- token tm tok
+  let j = round $ p * fromIntegral d
+  return $ neighbours tm source j n 
+  
