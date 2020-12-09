@@ -1,0 +1,132 @@
+<!-- vue.js development version, includes helpful console warnings -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+
+<div id="app">
+  <h2>{{ message }}</h2>
+  <span v-bind:title="message">
+    Hover your mouse over me for a few seconds
+    to see my dynamically bound title!
+  </span>
+</div>
+
+<div id="app-2">
+  <span v-bind:title="message">
+    Hover your mouse over me for a few seconds
+    to see my dynamically bound title!
+  </span>
+</div>
+
+<div id="app-3">
+  <span v-if="seen">Now you see me</span>
+</div>
+
+<div id="app-4" class="code">
+  <ol>
+    <li v-for="todo in todos">
+      {{ todo.text }}
+    </li>
+  </ol>
+</div>
+
+<div id="app-5">
+  <p>{{ message }}</p>
+  <button v-on:click="reverseMessage">Reverse Message</button>
+</div>
+
+<div id="app-6">
+  <h2>Vue.js WebSocket Tutorial</h2> 
+  <button v-on:click="sendMessage('hello')">Send Message</button>
+</div>
+
+<script>
+  var app = new Vue({
+      el: '#app',
+      data: {
+          message: 'Hello multiverse!'
+      }
+  })
+
+  var app2 = new Vue({
+      el: '#app-2',
+      data: {
+          message: 'You loaded this page on ' + new Date().toLocaleString()
+      }
+  })
+
+  var app3 = new Vue({
+      el: '#app-3',
+      data: {
+          seen: true
+      }
+  })
+
+  var app4 = new Vue({
+      el: '#app-4',
+      data: {
+          todos: [
+              { text: 'Learn Vue' },
+              { text: 'Create API in Haskell'},
+              { text: 'Build something awesome' }
+          ]
+      }
+  })
+  
+  var app5 = new Vue({
+      el: '#app-5',
+      data: {
+          message: 'Hello Vue.js!'
+      },
+      methods: {
+          reverseMessage: function () {
+              this.message = this.message.split('').reverse().join('')
+          }
+      }
+  })
+  
+  var app6 = new Vue({
+      el: '#app-6',
+      data: function() {
+          return {
+              connection: null
+          }
+      },
+      methods: {
+          sendMessage: function(message) {
+              console.log("send")
+              console.log(this.connection);
+              this.connection.send(message);
+          }
+      },
+      created: function() {
+          console.log("Starting connection to WebSocket Server")
+          this.connection = new WebSocket("wss://echo.websocket.org")
+
+          this.connection.onmessage = function(event) {
+              console.log(event);
+          }
+
+          this.connection.onopen = function(event) {
+              console.log(event)
+              console.log("Successfully connected to the echo websocket server...")
+          }
+      }
+  })  
+</script>
+
+<style>
+  
+  body {
+      font-family: helvetica;
+      background-color: lightblue;
+  }
+
+  h2 {
+      color: white;
+  }
+
+  .code {
+      font-family: monaco;
+      font-size: 20px;
+      text-align: left;
+  }
+</style>
