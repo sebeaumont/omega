@@ -1,19 +1,21 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE Strict #-}
+{-# LANGUAGE StrictData #-}
 
 module Data.SDM.SemanticMap where
 
 import Control.DeepSeq (NFData)
 import Control.Monad.IO.Class (liftIO)
 import qualified Data.HashMap.Strict as Map
-import Data.List
-import Data.SDM.Entropy
+import Data.List ( sortOn )
+import Data.SDM.Entropy ( MonadEntropy, withEntropy )
 import Data.SDM.SemanticVector
-import Data.SDM.VectorSpace
+    ( SemanticVector(sV), d, mutual, makeSemanticVector )
+import Data.SDM.VectorSpace ( distance )
 import Data.Text.Lazy (Text)
 import qualified Data.Text.Lazy.IO as TIO
-import Data.Text.Tokenize
+import Data.Text.Tokenize ( tokens, frames )
 
 -- factor out some of this relevant function should be obvious from this newtype/c'tor usage below...
 -- could use the same type to map to sparse vectors for graphs/hypergraphs...
