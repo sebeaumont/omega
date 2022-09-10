@@ -8,9 +8,10 @@ import Data.SDM.SemanticVector
 setupEnv :: IO (TokenMap, SemanticVector)
 setupEnv = do 
   idx <- indexFile "dat/shakespeare.txt" 10 1
-  let Just duchess = token idx "duchess"
-  return (idx, duchess)
-  
+  case token idx "duchess" of
+    Just duchess -> return (idx, duchess)
+    Nothing -> fail "the duchess is missing from index"
+    
 main :: IO ()
 main = defaultMain [
   env setupEnv $ \ ~(idx, duchess) -> bgroup "main"
