@@ -5,20 +5,30 @@
 
 module Data.SDM.SemanticMap where
 
-import Control.DeepSeq (NFData)
-import Control.Monad.IO.Class (liftIO)
+import Control.DeepSeq
+       (NFData)
+import Control.Monad.IO.Class
+       (liftIO)
 import qualified Data.HashMap.Strict as Map
-import Data.List ( sortOn )
-import Data.SDM.Entropy ( MonadEntropy, withEntropy )
+import Data.List
+       ( sortOn )
+import Data.SDM.Entropy
+       ( MonadEntropy, withEntropy )
 import Data.SDM.SemanticVector
-    ( SemanticVector(sV), d, mutual, makeSemanticVector )
-import Data.SDM.VectorSpace ( distance )
-import Data.Text.Lazy (Text)
+       ( SemanticVector(sV), d, mutual, makeSemanticVector )
+import Data.SDM.VectorSpace
+       ( distance )
+import Data.Text.Lazy
+       (Text)
+import Data.Text.Tokenize
+       ( tokens, frames )
+       
 import qualified Data.Text.Lazy.IO as TIO
-import Data.Text.Tokenize ( tokens, frames )
 
--- factor out some of this relevant function should be obvious from this newtype/c'tor usage below...
--- could use the same type to map to sparse vectors for graphs/hypergraphs...
+
+-- TODO: factor out some of this: relevant functions should be obvious
+-- from this newtype/c'tor usage below...  could use the same type to
+-- map to sparse vectors for graphs/hypergraphs...
 
 -- | More powerful type for SemanticMap
 newtype SemanticMap a = SemanticMap (Map.HashMap a SemanticVector)
@@ -104,11 +114,10 @@ neighbours (SemanticMap m) !v !s !n =
 token :: TokenMap -> Text -> Maybe SemanticVector
 token (SemanticMap m) !s = Map.lookup s m
 
-
 -- | Convenience for lookups
 neighbourhood :: TokenMap -> Text -> Double -> Int -> Maybe [(Text, Int)]
 neighbourhood tm tok p n = do
   source <- token tm tok
   let j = round $ p * fromIntegral d
   return $ neighbours tm source j n 
-  
+

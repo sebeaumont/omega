@@ -1,11 +1,3 @@
-module Data.SDM.VectorSpace.SparseRandom where
-
-import Control.Monad
-import Data.SDM.Entropy
-import Data.SDM.VectorSpace.Vector
-import Data.SDM.VectorSpace.SparseVector
-
-
 -- | Sparse distributed vectors have a uniform probability `p`/`d` of
 -- having a value at any index of given dimensionality `d`.  To
 -- construct a sparse random bit vector in the presence of entropy we
@@ -14,12 +6,18 @@ import Data.SDM.VectorSpace.SparseVector
 -- and in this implementation using finite `Set`s is bounded by
 -- the max Int value.
 
+module Data.SDM.VectorSpace.SparseRandom where
+
+import Control.Monad
+import Data.SDM.Entropy
+import Data.SDM.VectorSpace.Vector
+import Data.SDM.VectorSpace.SparseVector
+
 makeSparseRandomBitVector  :: (MonadEntropy m) => Int -> Int -> m SparseBitVector
 makeSparseRandomBitVector p d = (BVec . toIndex) <$> (getRandomList p d)
 
-
 -- | Make batch of `n` random index SparseBitVectors
--- withEntropy $ makeSparseRandomBitVectors 10 16 16496 :: IO ([SparseBitVector Word16])
+-- e.g. withEntropy $ makeSparseRandomBitVectors 10 16 16496 :: IO ([SparseBitVector Word16])
 
 makeSparseRandomBitVectors :: (MonadEntropy m) => Int -> Int -> Int -> m [SparseBitVector]
 makeSparseRandomBitVectors n p d = replicateM n (makeSparseRandomBitVector p d)
