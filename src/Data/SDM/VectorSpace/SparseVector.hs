@@ -1,22 +1,20 @@
 {-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE Strict #-}
 
 module Data.SDM.VectorSpace.SparseVector where
 
-import GHC.Generics
-import Control.DeepSeq
-
 import Data.Set (Set)
-import Data.SDM.VectorSpace.Vector
+import Data.SDM.VectorSpace.Vector 
+    ( Matrix, Vector, Idx, toIndex, indexSet, toVector, union, diff )
 
 -- | Sparse vectors.
-newtype SparseBitVector = BVec Idx deriving (Show, Generic, NFData)
+newtype SparseBitVector = BVec Idx deriving (Show)
 
-newtype SparseVector v = SVec (Vector v) deriving (Show)
+newtype SparseVector v = SVec (Vector v) 
+  deriving (Show)
 
-newtype SparseMatrix v = SMat (Matrix v) deriving (Show)
-
+newtype SparseMatrix v = SMat (Matrix v) 
+  deriving (Show)
 
 -- | Construct non-random sparse vector from lists of indexes and values
 --{-# INLINE fromList #-}
@@ -40,5 +38,3 @@ add (BVec !u) (BVec !v) = BVec $ union u v
 --{-# INLINE sub #-}
 sub :: SparseBitVector -> SparseBitVector -> SparseBitVector
 sub (BVec !u) (BVec !v) = BVec $ diff u v
-
-

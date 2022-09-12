@@ -22,8 +22,8 @@ import Data.SDM.VectorSpace.SparseVector
 import Data.SDM.VectorSpace.SparseRandom
 import Data.SDM.VectorSpace.DenseVector
 
--- | A dimensional context within which to interpret vectors we use a
--- Double as this is most general! could make this a type param of Dimensions
+-- | A context within which to interpret vectors, providing the dimensionality
+-- of the space.
 
 data Dimensions = Dimensions { spaceDims :: !Double }
 
@@ -42,7 +42,6 @@ instance MonadSpace Space where
 dimensions :: MonadSpace m => m Double
 dimensions = liftSpace $ Space $ asks spaceDims >>= \n -> return n
 
-
 -- | VectorSpace, InnerProductSpace etc. over a Field `f` not sure if this is useful yet!
 -- maybe a GADT to evaluate Vector algebra might be more useful...
 
@@ -50,6 +49,5 @@ dimensions = liftSpace $ Space $ asks spaceDims >>= \n -> return n
 class VectorSpace v where
   add :: Vector v -> Vector v -> Vector v
   scale :: Vector v -> v -> Vector v
--}  
-  
+-}   
 

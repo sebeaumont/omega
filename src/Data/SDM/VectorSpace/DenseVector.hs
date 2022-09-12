@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE Strict #-}
 
 module Data.SDM.VectorSpace.DenseVector where
 
@@ -19,7 +20,7 @@ import Data.SDM.VectorSpace.SparseVector
 newtype DenseBitVector = DBVec (U.Vector Bit) deriving (Generic, NFData)
 
 instance Show DenseBitVector where
-  show (DBVec v) = "DBVec " ++ (show $ countBits v)
+  show (DBVec v) = "DBVec " ++ show  (countBits v)
 
 -- | Modify in place semantics for BitVectors
 newtype DenseMBitVector m = DMBVec (U.MVector (PrimState m) Bit) deriving (Generic, NFData)
@@ -29,30 +30,32 @@ newtype DenseMBitVector m = DMBVec (U.MVector (PrimState m) Bit) deriving (Gener
 --{-# INLINE bitsPerWord #-}
 bitsPerWord :: Integral a => a
 bitsPerWord = round $ logBase 2 (fromIntegral (maxBound :: Word) :: Double)
+{-# INLINE bitsPerWord #-}
 
--- {-# INLINE exp2 -#}
 exp2 :: Int -> Word
-exp2 !n = shiftL 1 n
+exp2 = shiftL 1
+{-# INLINE exp2 #-}
 
---{-# INLINE wordBit #-}
+
 wordBit :: Int -> (Int, Word)
-wordBit !n = let (!i,!j) = divMod n bitsPerWord in (i, exp2 j) 
+wordBit n = let (!i,!j) = divMod n bitsPerWord in (i, exp2 j) 
+{-# INLINE wordBit #-}
 
 --{-# INLINE bitIndexes #-}
 bitIndexes :: SparseBitVector -> (Int, [(Int, Word)])
 bitIndexes !bv =
-  let !maxi = Set.findMax (index bv) `div` bitsPerWord
-      !idx = [wordBit i | i <- Set.elems $ index bv]
+  let maxi = Set.findMax (index bv) `div` bitsPerWord
+      idx = [wordBit i | i <- Set.elems $ index bv]
   in (maxi, mergeWith (.|.) idx)
 
---{-# INLiNE bitVecToDense #-}    
+
 bitVecToDense ::  SparseBitVector -> U.Vector Word
 bitVecToDense !bv =
   let (!size, !wib) = bitIndexes bv
-      !vector = U.replicate (fromIntegral (size+1)) 0
+      vector = U.replicate (fromIntegral (size+1)) 0
   in vector U.// wib
+{-# INLINE bitVecToDense #-}    
 
---{-# INLINE mergeWith #-}
 mergeWith :: Ord a => (b -> b -> b) -> [(a, b)] -> [(a, b)]
 mergeWith f ((i1,v1):(i2,v2):rs) 
   | i1 == i2 = let m = (i1, f v1 v2) in mergeWith f (m:rs)
@@ -60,36 +63,43 @@ mergeWith f ((i1,v1):(i2,v2):rs)
 mergeWith _ l@[(_,_)] = l  
 mergeWith _ []  = []  
 
---{-# INLINE denseZeroBVector #-}
+
 denseZeroBVector :: Int -> DenseBitVector
 denseZeroBVector d = DBVec $ U.replicate d 0
+{-# INLINE denseZeroBVector #-}
 
 toDenseBitVector :: SparseBitVector -> DenseBitVector
 toDenseBitVector u = DBVec $ castFromWords $ bitVecToDense u
+{-# INLINE toDenseBitVector #-}
 
 -- metric
 distance :: DenseBitVector -> DenseBitVector -> Int  
 distance (DBVec !u) (DBVec !v) = countBits $ zipBits xor u v
+{-# INLINE distance #-}
 
 -- algebra
 andv :: DenseBitVector -> DenseBitVector -> DenseBitVector
 andv (DBVec !u) (DBVec !v) = DBVec $ zipBits (.&.) u v 
+{-# INLINE andv #-}
 
 orv :: DenseBitVector -> DenseBitVector -> DenseBitVector
 orv (DBVec !u) (DBVec !v) = DBVec $ zipBits (.|.) u v 
+{-# INLINE orv #-}
 
 xorv :: DenseBitVector -> DenseBitVector -> DenseBitVector
 xorv (DBVec !u) (DBVec !v) = DBVec $ zipBits xor u v 
+{-# INLINE xorv #-}
 
 negv :: DenseBitVector -> DenseBitVector
 negv (DBVec !u) = DBVec $ invertBits u
+{-# INLINE negv #-}
 
 zerov :: Int -> DenseBitVector
 zerov = denseZeroBVector
 
 -- TODO contraction/expansion of bit runs...
 scalev :: Double -> DenseBitVector -> DenseBitVector
-scalev _ !v = v
+scalev _ v = v
 
 {-
 --{-# INLINE superpose #-}
@@ -115,4 +125,3 @@ superposeM !sv (DMBVec !dv) =
 superposeM :: PrimMonad m => DenseBitVector -> DenseMBitVector m  -> m ()
 superposeM (DBVec !v) (DMBVec !u) = zipInPlace (.|.) v u
   
-      

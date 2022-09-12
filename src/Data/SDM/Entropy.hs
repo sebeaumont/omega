@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 -- | This random index generator is central to SDM.  We might consider
@@ -12,15 +13,18 @@ TODO
  - N.B. getRandomList is the rate limiting step so performance of this is critical
 -}
 
-module Data.SDM.Entropy ( withEntropy
-                        , getRandomList
-                        , MonadEntropy
-                        , Random.Variate
-                        ) where
+module Data.SDM.Entropy 
+  ( withEntropy
+  , getRandomList
+  , MonadEntropy
+  , Random.Variate
+  ) where
 
 import qualified System.Random.MWC as Random
 import Control.Monad.Reader
+    ( replicateM, asks, MonadIO(..), MonadReader, ReaderT(..) )
 
+-- | System random seeded PRNG
 type Gen = Random.GenIO
 
 -- | Encapsulate underlying RNG
@@ -45,6 +49,7 @@ instance MonadEntropy Entropy where
   liftEntropy = id
 
 -- | Run actions in the context of Entropy monad
+-- using the system random generator
 
 withEntropy :: Entropy a -> IO a
 withEntropy (Entropy s) = liftIO initRNG >>= \r -> runReaderT s (Env r) 
@@ -53,6 +58,6 @@ withEntropy (Entropy s) = liftIO initRNG >>= \r -> runReaderT s (Env r)
 -- for the upper bound (sparse dimension) `d`.
 
 getRandomList :: (MonadEntropy m, Random.Variate a, Integral a) => Int -> a -> m [a]
-getRandomList n d = liftEntropy $ Entropy $ do
-  RNG g <- asks envRNG
+getRandomList !n !d = liftEntropy $ Entropy $ do
+  RNG !g <- asks envRNG
   replicateM n (Random.uniformR (0,d-1) g)
