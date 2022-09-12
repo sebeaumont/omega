@@ -24,6 +24,7 @@ import qualified System.Random.MWC as Random
 import Control.Monad.Reader
     ( replicateM, asks, MonadIO(..), MonadReader, ReaderT(..) )
 
+-- | System random seeded PRNG
 type Gen = Random.GenIO
 
 -- | Encapsulate underlying RNG
@@ -48,6 +49,7 @@ instance MonadEntropy Entropy where
   liftEntropy = id
 
 -- | Run actions in the context of Entropy monad
+-- using the system random generator
 
 withEntropy :: Entropy a -> IO a
 withEntropy (Entropy s) = liftIO initRNG >>= \r -> runReaderT s (Env r) 
